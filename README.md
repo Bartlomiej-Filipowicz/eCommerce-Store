@@ -1,1 +1,1 @@
-eCommerce Store built with React, Django and PostgreSQL
+eCommerce store built with React, Django and PostgreSQL
