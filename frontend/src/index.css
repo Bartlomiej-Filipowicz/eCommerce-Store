@@ -1,0 +1,11 @@
+main{
+    min-height: 80vh; /* footer moved to the bottom */
+}
+
+h3{
+    padding: 1rem 0;
+}
+
+.rating span{
+    margin: 0.1rem;
+}
