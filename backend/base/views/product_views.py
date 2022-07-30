@@ -1,11 +1,17 @@
+from email import message
 from django.shortcuts import render
-from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from .products import products
-from .models import Product
+from base.models import Product
 
-from .serializers import ProductSerializer
+
+from rest_framework import status
+
+from base.serializers import ProductSerializer
+
+#from backend.base import serializers
+from .. import serializers
 
 # A view function, or view for short, is a Python function that takes a web request and returns a web response.
 
@@ -22,14 +28,6 @@ from .serializers import ProductSerializer
 # delivered to another data store (such as an in-memory computing platform), application,
 # or some other destination.
 
-@api_view(['GET'])
-def getRoutes(request):
-    routes = [
-        '/api/products/',
-        '/api/products/create/',
-    ]
-    # JsonResponse is an HttpResponse subclass that helps to create a JSON-encoded response
-    return Response(routes)
 
 @api_view(['GET'])
 def getProducts(request):
