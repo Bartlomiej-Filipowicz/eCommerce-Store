@@ -2,6 +2,18 @@ main{
     min-height: 80vh; /* footer moved to the bottom */
 }
 
+#root {
+    min-height: 100vh;
+    position: relative; 
+} 
+
+Footer{
+    position:absolute;
+    left:0;
+    bottom:0;
+    right:0;
+}
+
 h1{
     font-size: 1.8rem;
     padding: 1rem 0;

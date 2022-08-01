@@ -43,6 +43,8 @@ function HomeScreen() {
     
   }, [dispatch])
 
+
+
   return (
     <div>
         <h1>Latest Products</h1>

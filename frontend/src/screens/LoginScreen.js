@@ -73,6 +73,8 @@ function LoginScreen() {
                     </Form.Control>
                 </Form.Group>
 
+                <br/>
+
                 <Button type='submit' variant='primary'>Sign In</Button>
 
             </Form>

@@ -37,6 +37,7 @@ function App() {
           
         </Container>
       </main>
+      <br/><br/><br/>
       <Footer/>
     </Router>
   );
