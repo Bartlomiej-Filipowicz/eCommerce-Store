@@ -46,3 +46,10 @@ export const login = (email, password) => async (dispatch) => {
     }
 
 }
+
+// userInfo is deleted from local storage
+// which is an equivalent of logging out
+export const logout = () => (dispatch) => {
+    localStorage.removeItem('userInfo')
+    dispatch({ type: USER_LOGOUT })
+}
