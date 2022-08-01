@@ -65,6 +65,29 @@ def registerUser(request):
         message = {'detail':'User with this email already exists :('}
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated]) # protected route
+def updateUserProfile(request):
+    user = request.user
+    serializer = UserSerializerWithToken(user, many=False) # 'many=False' means that I want to obtain one user
+
+    data = request.data
+
+    user.first_name = data['name']
+    user.username = data['email']
+    user.email = data['email']
+
+    if data['password'] != '':
+        user.password = make_password(data['password'])
+
+    user.save()
+
+    # return Response(user) <- it's incorrect because it's NOT serialized
+    return Response(serializer.data) # now the data comes from the database
+
+
 # if token is off, then access is denied because authentication credentials were not provided
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) # protected route
@@ -73,6 +96,7 @@ def getUserProfile(request):
     serializer = UserSerializer(user, many=False) # 'many=False' means that I want to obtain one user
     # return Response(user) <- it's incorrect because it's NOT serialized
     return Response(serializer.data) # now the data comes from the database
+
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser]) # only for admins
