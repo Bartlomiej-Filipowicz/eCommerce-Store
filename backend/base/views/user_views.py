@@ -33,6 +33,7 @@ from .. import serializers
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        # a username and a password authentication
         data = super().validate(attrs)
 
         serializer = UserSerializerWithToken(self.user).data
