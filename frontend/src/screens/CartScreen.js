@@ -9,7 +9,7 @@ function CartScreen() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const productId = id
-  const qty = Number(searchParams.get('qty')) > 1 ? Number(searchParams.get('qty')) : 1
+  const qty = Number(searchParams.get('qty')) > 1 ? Number(searchParams.get('qty')) : 1 // replaces location.search
   // below is an older version
   //const qty = location.search ? Number(location.search.split('=')[1]) : 1
   // ^^splits url by '=' and returns the second value, which is quantity
@@ -20,6 +20,7 @@ function CartScreen() {
   const cart = useSelector(state => state.cart)
   const { cartItems } = cart
 
+  // things inside useEffect are done after each render of a component(including useState value refresh)
   useEffect(() => {
     if(productId) {
       dispatch(addToCart(productId, qty)) // addToCart is in cartActions.js
