@@ -40,7 +40,7 @@ function ProductScreen() {
 
   const dispatch = useDispatch()
 
-  const productDetails = useSelector(state => state.productDetails)
+  const productDetails = useSelector(state => state.productDetails) // productDetails is a state
 
   const { loading, error, product } = productDetails 
 
