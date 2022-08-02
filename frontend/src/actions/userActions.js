@@ -12,6 +12,12 @@ import {
     USER_DETAILS_REQUEST,
     USER_DETAILS_SUCCESS,
     USER_DETAILS_FAIL,
+    USER_DETAILS_RESET,
+
+    USER_UPDATE_PROFILE_REQUEST,
+    USER_UPDATE_PROFILE_SUCCESS,
+    USER_UPDATE_PROFILE_FAIL,
+    USER_UPDATE_PROFILE_RESET,
 } from '../constants/userConstants'
 import axios from 'axios'
 
@@ -153,9 +159,65 @@ export const getUserDetails = (id) => async (dispatch, getState) => {
 
 
 
+export const updateUserProfile = (user) => async (dispatch, getState) => {
+
+    try
+    {
+        dispatch({
+            type: USER_UPDATE_PROFILE_REQUEST
+        })
+
+        const {
+            userLogin: { userInfo }, // I get information who's logged in
+        } = getState()              // getState() takes a state of an entire application
+
+        const config = {
+            headers: {
+                'Content-type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}` // the route to a user profile page is protected that's why
+                                                         //  authorization is needed
+            }
+        }
+
+        // it sends a username and a password and gets in return the JWT token
+        const {data} = await axios.put(
+            '/api/users/profile/update/',
+            user,
+            config
+        )
+
+        dispatch({
+            type: USER_UPDATE_PROFILE_SUCCESS,
+            payload: data 
+        })
+
+        dispatch({
+            type: USER_LOGIN_SUCCESS,
+            payload: data 
+        })
+
+        // I create data in local storage which informs that a user is logged in
+        localStorage.setItem('userInfo', JSON.stringify(data))
+
+    }
+    catch (error)
+    {
+        dispatch({
+            type: USER_UPDATE_PROFILE_FAIL,
+            payload: error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+        })
+    }
+
+}
+
+
+
 // userInfo is deleted from local storage
 // which is an equivalent of logging out
 export const logout = () => (dispatch) => {
     localStorage.removeItem('userInfo')
     dispatch({ type: USER_LOGOUT })
+    dispatch({ type: USER_DETAILS_RESET })
 }

@@ -4,8 +4,8 @@ import { Form, Button, Row, Col } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
-import { getUserDetails } from '../actions/userActions'
-
+import { getUserDetails, updateUserProfile } from '../actions/userActions'
+import { USER_UPDATE_PROFILE_RESET } from '../constants/userConstants'
 
 
 function ProfileScreen() {
@@ -17,7 +17,7 @@ function ProfileScreen() {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [message, setMessage] = useState('') // checking if passwords match
-
+    const [messageSuccess, setMessageSuccess] = useState('') // message for a successful update
 
     const dispatch = useDispatch()
 
@@ -27,6 +27,9 @@ function ProfileScreen() {
     const userLogin = useSelector(state => state.userLogin) // I have to know which user is logged in
     const { userInfo } = userLogin
 
+    const userUpdateProfile = useSelector(state => state.userUpdateProfile) // I have to know which user is logged in
+    const { success } = userUpdateProfile
+
     const navigate = useNavigate() // replaces history
 
     // things inside useEffect are done after each render of a component(including useState value refresh)
@@ -35,7 +38,8 @@ function ProfileScreen() {
             navigate('/login') // replaces history.push()
         }
         else {
-            if(!user || !user.name) { // if there is no user data in redux store
+            if(!user || !user.name || success) { // if there is no user data in redux store
+                dispatch({ type: USER_UPDATE_PROFILE_RESET })
                 dispatch(getUserDetails('profile'))
                 // dispatch() sends the getUserDetails action to a reducer
             }
@@ -44,16 +48,24 @@ function ProfileScreen() {
                 setEmail(user.email)
             }
         }
-    }, [dispatch, userInfo, user])
+    }, [dispatch, userInfo, user, success])
 
     const submitHandler = (e) => {
         e.preventDefault()
 
         if (password != confirmPassword) {
+            setMessageSuccess('')
             setMessage('Passwords do not match')
         }
         else {
-            console.log('updating...')
+            dispatch(updateUserProfile({
+                'id': user._id,
+                'name': name,
+                'email': email,
+                'password': password
+            }))
+            setMessage('')
+            setMessageSuccess('Profile details updated')
         }
     }
 
@@ -68,6 +80,7 @@ function ProfileScreen() {
             <h2>User Profile</h2>
 
             {message && <Message variant='danger'>{message}</Message> }
+            {messageSuccess && <Message variant='success'>{messageSuccess}</Message> }
             {error && <Message variant='danger'>{error}</Message> }
             {loading && <Loader/> }
 

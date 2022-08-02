@@ -12,6 +12,13 @@ import {
          USER_DETAILS_REQUEST,
          USER_DETAILS_SUCCESS,
          USER_DETAILS_FAIL,
+         USER_DETAILS_RESET,
+
+
+         USER_UPDATE_PROFILE_REQUEST,
+         USER_UPDATE_PROFILE_SUCCESS,
+         USER_UPDATE_PROFILE_FAIL,
+         USER_UPDATE_PROFILE_RESET,
 } from '../constants/userConstants'
 
 
@@ -72,6 +79,32 @@ export const userDetailsReducer = (state = { user: {} }, action) => {
 
         case USER_DETAILS_FAIL:
             return { loading: false, error: action.payload }
+
+        case USER_DETAILS_RESET:
+            return { user: {} }
+
+        default:
+            return state
+    }
+}
+
+
+
+
+export const userUpdateProfileReducer = (state = {  }, action) => {
+    switch(action.type){
+        case USER_UPDATE_PROFILE_REQUEST: // when the process of logging in is in progress
+            return { loading: true }
+            //^^^ by setting 'loading' to 'true' I'm letting users know that their request is being executed
+
+        case USER_UPDATE_PROFILE_SUCCESS: // it returned data
+            return { loading: false, success: true, userInfo: action.payload } // I get action.payload from an API
+
+        case USER_UPDATE_PROFILE_FAIL:
+            return { loading: false, error: action.payload }
+
+        case USER_UPDATE_PROFILE_RESET:
+            return {}
 
         default:
             return state
