@@ -25,6 +25,9 @@ const cartItemsFromStorage = localStorage.getItem('cartItems') ?
 const userInfoFromStorage = localStorage.getItem('userInfo') ?
     JSON.parse(localStorage.getItem('userInfo')) : null
 
+const shippingAddressFromStorage = localStorage.getItem('shippingAddress') ?
+    JSON.parse(localStorage.getItem('shippingAddress')) : {}
+
 //const middleware = [thunk]
 
 //const store = configureStore(reducer, initialState,
@@ -32,7 +35,10 @@ const userInfoFromStorage = localStorage.getItem('userInfo') ?
 // ^^^ originally it was 'createStore'
 
 const initialState = { // takes cart products from a local storage
-    cart: { cartItems: cartItemsFromStorage }, // cart is a state
+    cart: { 
+        cartItems: cartItemsFromStorage,
+        shippingAddress: shippingAddressFromStorage,
+    }, // cart is a state
     userLogin: { userInfo: userInfoFromStorage} // userLogin is a state
 } 
 

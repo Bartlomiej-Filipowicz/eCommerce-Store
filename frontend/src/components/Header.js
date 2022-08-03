@@ -21,7 +21,7 @@ function Header() {
           <Container>                                        {// it was generated from bootstrap
           }
             <LinkContainer to='/'>
-              <Navbar.Brand>AGH Shop</Navbar.Brand>
+              <Navbar.Brand>AGH Store</Navbar.Brand>
             </LinkContainer>
             
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
