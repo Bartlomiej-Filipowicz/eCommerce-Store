@@ -33,7 +33,7 @@ function App() {
             <Route path='/login' element={<LoginScreen />} />
             <Route path='/register' element={<RegisterScreen />} />
             <Route path='/profile' element={<ProfileScreen />} />
-            <Route path='/login/shipping' element={<ShippingScreen />} />  { // it can be problematic, be careful
+            <Route path='/login/shipping' element={<ShippingScreen />} />  { // path can be problematic, be careful
 
             }
             <Route path='/product/:id' element={<ProductScreen />} />
