@@ -40,15 +40,17 @@ function CartScreen() {
 
   return (
     <Row>
+      <h1>Shopping Cart</h1>
       <Col md={8}>
-        <h1>Shopping Cart</h1>
+        
         {cartItems.length === 0 ? (
           <Message variant='info'>
             Your cart is empty <Link to='/'>Go to Homepage</Link>
           </Message>
         ) : (
           <ListGroup variant='flush' >
-            {cartItems.map(item => (
+            {cartItems.map(item => ( 
+              <div>
                 <ListGroup.Item key={item.product} >
                   
                     <Row>
@@ -56,13 +58,13 @@ function CartScreen() {
                             <Image src={item.image} alt={item.name} fluid rounded/>
                         </Col>
 
-                        <Col md={3}>
+                        <Col md={3} className='mt-2'>
                             <Link to={`/product/${item.product}`}>{item.name}</Link>
                         </Col>
 
-                        <Col md={2}>${item.price}</Col>
+                        <Col md={2} className='mt-2'>${item.price}</Col>
 
-                        <Col md={3}>
+                        <Col md={3} className='mt-2'>
                             <Form.Control 
                               as="select"
                               value={item.qty}
@@ -83,7 +85,7 @@ function CartScreen() {
                             </Form.Control>
                         </Col>
 
-                        <Col md={1}>
+                        <Col md={1} className='mt-2'>
                               <Button 
                                 type='button'
                                 variant='light'
@@ -95,6 +97,8 @@ function CartScreen() {
                     </Row>
                   
                 </ListGroup.Item>
+              <br/>
+              </div>
                 
           ))}  
           </ListGroup>
@@ -104,15 +108,13 @@ function CartScreen() {
       </Col>
 
       <Col md={4}>
-          <Card>
+          <Card className='mt-0 p-3 border border-2 rounded-3 border border-light'>
               <ListGroup variant='flush'>
                   <ListGroup.Item>
                       <h2>Subtotal ({cartItems.reduce((acc, item) => acc + item.qty, 0 )}) items</h2>
                       ${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0 ).toFixed(2)}
                   </ListGroup.Item>
-              </ListGroup>
-
-              <ListGroup variant='flush'>
+              <br/>
                   <ListGroup.Item>
                       <div className="d-grid gap-2">
                         <Button type='button' size='lg' 

@@ -38,7 +38,7 @@ function PaymentScreen() {
 
                 <Form.Group>
 
-                    <Form.Label as='legend'>Select Method</Form.Label>
+                    <Form.Label as='legend'><h1>Select Method</h1></Form.Label>
 
                     <Col>
                         <Form.Check 

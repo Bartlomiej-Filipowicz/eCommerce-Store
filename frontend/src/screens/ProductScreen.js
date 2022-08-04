@@ -83,7 +83,7 @@ function ProductScreen() {
                   </ListGroup.Item>
 
                   <ListGroup.Item>
-                    Price: {product.price} PLN
+                    Price:  ${product.price}
                   </ListGroup.Item>
 
                   <ListGroup.Item>
@@ -93,13 +93,13 @@ function ProductScreen() {
               </Col>
 
               <Col md={3}>
-                <Card>
+                <Card className='mt-0 p-3 border border-2 rounded-3 border border-light'>
                   <ListGroup variant='flush'>
                     <ListGroup.Item>
                       <Row>
-                        <Col>Price:</Col>
+                        <Col><strong class="text-secondary">Price </strong></Col>
                         <Col>
-                          <strong>{product.price} PLN</strong>
+                          <strong>${product.price}</strong>
                         </Col>
                       </Row>
 
@@ -107,7 +107,7 @@ function ProductScreen() {
 
                     <ListGroup.Item>
                       <Row>
-                        <Col>Status:</Col>
+                        <Col><strong class="text-light">Status </strong></Col>
                         <Col>
                           {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}
                         </Col>
@@ -118,7 +118,7 @@ function ProductScreen() {
                     {product.countInStock > 0 && (
                       <ListGroup.Item>
                         <Row>
-                          <Col>Qty</Col>
+                          <Col><strong class="text-light">Qty </strong></Col>
                           <Col xs='auto' className='my-1'>
                             <Form.Control 
                             as="select"
@@ -142,8 +142,8 @@ function ProductScreen() {
                         </Row>
                       </ListGroup.Item>
                     )}
-
-                    <ListGroup.Item>
+                
+                    <ListGroup.Item className='mt-3'>
                       <Row>
                         <Button
                          onClick={addToCartHandler}
