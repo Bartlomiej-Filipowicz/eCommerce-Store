@@ -111,7 +111,7 @@ function PlaceOrderScreen() {
                                 </Row>
                             </ListGroup.Item>
 
-                            <ListGroup.Item>
+                            <ListGroup.Item className='pb-3'>
                                 <Row>
                                     <Col><strong class="text-secondary">Total </strong></Col>
                                     <Col>${totalPrice}</Col>
@@ -119,8 +119,8 @@ function PlaceOrderScreen() {
                                 </Row>
                                 
                             </ListGroup.Item>
-                            <br/>
-                            <ListGroup.Item>
+                            
+                            <ListGroup.Item className='mt-3'>
                                 <div className="d-grid gap-2">
                                     <Button
                                         type='button'

@@ -50,21 +50,21 @@ function CartScreen() {
         ) : (
           <ListGroup variant='flush' >
             {cartItems.map(item => ( 
-              <div>
-                <ListGroup.Item key={item.product} >
+              
+                <ListGroup.Item key={item.product} className='mb-3' >
                   
                     <Row>
                         <Col md={2}>
                             <Image src={item.image} alt={item.name} fluid rounded/>
                         </Col>
 
-                        <Col md={3} className='mt-2'>
+                        <Col md={3} className='mt-3'>
                             <Link to={`/product/${item.product}`}>{item.name}</Link>
                         </Col>
 
-                        <Col md={2} className='mt-2'>${item.price}</Col>
+                        <Col md={2} className='mt-3'>${item.price}</Col>
 
-                        <Col md={3} className='mt-2'>
+                        <Col md={3} className='mt-3'>
                             <Form.Control 
                               as="select"
                               value={item.qty}
@@ -85,7 +85,7 @@ function CartScreen() {
                             </Form.Control>
                         </Col>
 
-                        <Col md={1} className='mt-2'>
+                        <Col md={1} className='mt-3'>
                               <Button 
                                 type='button'
                                 variant='light'
@@ -97,8 +97,7 @@ function CartScreen() {
                     </Row>
                   
                 </ListGroup.Item>
-              <br/>
-              </div>
+            
                 
           ))}  
           </ListGroup>
@@ -114,14 +113,14 @@ function CartScreen() {
                       <h2>Subtotal ({cartItems.reduce((acc, item) => acc + item.qty, 0 )}) items</h2>
                       ${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0 ).toFixed(2)}
                   </ListGroup.Item>
-              <br/>
-                  <ListGroup.Item>
+          
+                  <ListGroup.Item className='mt-3'>
                       <div className="d-grid gap-2">
                         <Button type='button' size='lg' 
                             disabled={cartItems.length === 0}
                             onClick={checkoutHandler}
                             >
-                              Proceed To Checkout
+                              <strong>Proceed To Checkout</strong>
                         </Button>
                       </div>
                   </ListGroup.Item>
