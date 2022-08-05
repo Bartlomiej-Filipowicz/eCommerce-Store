@@ -7,15 +7,17 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import { productListReducer, productDetailsReducer } from './reducers/productReducers'
 import { cartReducer } from './reducers/cartReducers'
 import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer } from './reducers/userReducers'
+import { orderCreateReducer } from './reducers/orderReducers'
 
 const reducer = combineReducers({
     productList: productListReducer, // productList is a state
     productDetails: productDetailsReducer,
-    cart: cartReducer,
+    cart: cartReducer,               // cart is a state
     userLogin: userLoginReducer,
     userRegister: userRegisterReducer,
     userDetails: userDetailsReducer,
     userUpdateProfile: userUpdateProfileReducer,
+    orderCreate: orderCreateReducer,
 })
 
 // if there are no products in a cart, return an empty array
@@ -28,6 +30,9 @@ const userInfoFromStorage = localStorage.getItem('userInfo') ?
 const shippingAddressFromStorage = localStorage.getItem('shippingAddress') ?
     JSON.parse(localStorage.getItem('shippingAddress')) : {}
 
+const paymentMethodFromStorage = localStorage.getItem('paymentMethod') ?
+    JSON.parse(localStorage.getItem('paymentMethod')) : ''
+
 //const middleware = [thunk]
 
 //const store = configureStore(reducer, initialState,
@@ -38,6 +43,7 @@ const initialState = { // takes cart products from a local storage
     cart: { 
         cartItems: cartItemsFromStorage,
         shippingAddress: shippingAddressFromStorage,
+        paymentMethod: paymentMethodFromStorage,
     }, // cart is a state
     userLogin: { userInfo: userInfoFromStorage} // userLogin is a state
 } 

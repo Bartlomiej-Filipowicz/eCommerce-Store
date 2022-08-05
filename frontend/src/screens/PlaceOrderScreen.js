@@ -4,8 +4,15 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Message from '../components/Message'
 import CheckoutSteps from '../components/CheckoutSteps'
+import { createOrder } from '../actions/orderActions'
+import { ORDER_CREATE_RESET } from '../constants/orderConstants'
 
 function PlaceOrderScreen() {
+
+    const orderCreate = useSelector(state => state.orderCreate)
+    const { order, error, success } = orderCreate
+
+    const dispatch = useDispatch()
 
     const cart = useSelector(state => state.cart)
 
@@ -18,8 +25,30 @@ function PlaceOrderScreen() {
     const taxPrice = Number( 0.05 * itemsPrice).toFixed(2)
     const totalPrice = (Number(itemsPrice) + Number(shippingPrice) + Number(taxPrice)).toFixed(2)
 
+    const navigate = useNavigate()  // replaces history
+
+    // navigate() should be inside useEffect(), because when it was outside it didn't work
+    useEffect(() => {
+        if (!cart.paymentMethod) {
+            navigate('/payment')    // replaces history.push()
+        }
+
+        if (success) {
+            navigate(`/order/${order._id}`) // replaces history.push()
+            dispatch({ type: ORDER_CREATE_RESET })
+        }
+    }, [success])
+
     const placeOrder = () => {
-        console.log('place order')
+        dispatch(createOrder({
+            orderItems: cart.cartItems,
+            shippingAddress: cart.shippingAddress,
+            paymentMethod: cart.paymentMethod,
+            itemsPrice: itemsPrice,
+            shippingPrice: shippingPrice,
+            taxPrice: taxPrice,
+            totalPrice: totalPrice,
+        }))
     }
 
     return (
@@ -118,6 +147,10 @@ function PlaceOrderScreen() {
                                     
                                 </Row>
                                 
+                            </ListGroup.Item>
+
+                            <ListGroup.Item>
+                                {error && <Message variant='danger'>{error}</Message>}
                             </ListGroup.Item>
                             
                             <ListGroup.Item className='mt-3'>

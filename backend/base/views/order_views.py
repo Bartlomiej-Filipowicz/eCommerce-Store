@@ -16,7 +16,7 @@ from base.serializers import ProductSerializer, OrderSerializer
 from .. import serializers
 
 @api_view(['POST'])
-@permission_classes(['IsAuthenticated'])
+@permission_classes([IsAuthenticated])
 def addOrderItems(request):
 
     user = request.user
@@ -67,6 +67,6 @@ def addOrderItems(request):
             product.countInStock -= item.qty
             product.save()
 
-    serializer = OrderSerializer(order, many=False)
+        serializer = OrderSerializer(order, many=False)
 
-    return Response(serializer.data)
+        return Response(serializer.data)
