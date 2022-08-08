@@ -7,6 +7,11 @@ import {
     ORDER_DETAILS_REQUEST,
     ORDER_DETAILS_SUCCESS,
     ORDER_DETAILS_FAIL,
+
+    ORDER_PAY_REQUEST,
+    ORDER_PAY_SUCCESS,
+    ORDER_PAY_FAIL,
+    ORDER_PAY_RESET,
 } from '../constants/orderConstants'
 
 import { CART_CLEAR_ITEMS } from '../constants/cartConstants'
@@ -103,6 +108,54 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
     {
         dispatch({
             type: ORDER_DETAILS_FAIL,
+            payload: error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+        })
+    }
+
+}
+
+
+
+export const payOrder = (id, paymentResult) => async (dispatch, getState) => {
+
+    try
+    {
+        dispatch({
+            type: ORDER_PAY_REQUEST
+        })
+
+        const {
+            userLogin: { userInfo }, // I get information who's logged in
+        } = getState()              // getState() takes a state of an entire application
+
+        const config = {
+            headers: {
+                'Content-type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}` // the route to a user profile page is protected that's why
+                                                         //  authorization is needed
+            }
+        }
+
+        // it sends a username and a password and gets in return the JWT token
+        const {data} = await axios.put(
+            `/api/orders/${id}/pay/`,
+            paymentResult,
+            config
+        )
+
+        dispatch({
+            type: ORDER_PAY_SUCCESS,
+            payload: data 
+        })
+
+
+    }
+    catch (error)
+    {
+        dispatch({
+            type: ORDER_PAY_FAIL,
             payload: error.response && error.response.data.detail
             ? error.response.data.detail
             : error.message,
