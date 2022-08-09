@@ -15,7 +15,7 @@
 ## General info
 eCommerce Store is a web application, where customers can create an account, log in, go through products and place order of desired products.
 
-The store consists of a homepage (where all products are displayed), a page of a single product, a cart page, a user account functionality, logging in, registering a new user, a user profile page, updating user profile, a checkout functionality (coming soon) and an admin screen (coming soon).
+The store consists of a homepage (where all products are displayed), a page of a single product, a cart page, a user account functionality, logging in, registering a new user, a user profile page, updating user profile, a checkout functionality and an admin screen (coming soon).
 
 This is a training project. The goal was to practice use of **Django**, **PostgreSQL** and **React** in a real project.
 
@@ -25,7 +25,7 @@ This is a training project. The goal was to practice use of **Django**, **Postgr
 - Updating user details
 - Browsing products
 - Adding products to a cart
-- Placing order [soon]
+- Placing order
 - Ability to manage users (for admins) [soon]
 - Ability to manage products (for admins) [soon]
 
