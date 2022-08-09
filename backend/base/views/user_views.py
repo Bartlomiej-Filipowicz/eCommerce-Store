@@ -106,3 +106,11 @@ def getUsers(request):
     # return Response(users) <- it's incorrect because the User object is NOT serialized
     return Response(serializer.data) # now the data comes from the database
 
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteUser(request, pk):
+    userForDeletion = User.objects.get(id=pk)
+    userForDeletion.delete()
+    return Response('User was deleted')
