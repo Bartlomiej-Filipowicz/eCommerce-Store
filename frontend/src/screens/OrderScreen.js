@@ -112,7 +112,7 @@ function OrderScreen() {
                             </p>
 
                             {order.isPaid ? (
-                                    <Message variant='success'>Paid on {order.paidAt}</Message>
+                                    <Message variant='success'>Paid on {order.paidAt.substring(0, 19).replace('T', '  ')}</Message>
                                     ) : (
                                         <Message variant='primary'>Not Paid</Message>
                                     )}
