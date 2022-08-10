@@ -43,7 +43,7 @@ function ProfileScreen() {
             navigate('/login') // replaces history.push()
         }
         else {
-            if(!user || !user.name || success) { // if there is no user data in redux store
+            if(!user || !user.name || success || userInfo._id !== user._id) { // if there is no user data in redux store
                 dispatch({ type: USER_UPDATE_PROFILE_RESET })
                 dispatch(getUserDetails('profile'))
                 // dispatch() sends the getUserDetails action to a reducer
