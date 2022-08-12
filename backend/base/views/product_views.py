@@ -41,3 +41,12 @@ def getProduct(request, pk): # pk stands for primary key
     product = Product.objects.get(_id=pk)
     serializer = ProductSerializer(product, many=False)
     return Response(serializer.data) # now the data comes from the database
+
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteProduct(request, pk):
+    product = Product.objects.get(_id=pk)
+    product.delete()
+    return Response('Producted Deleted')
