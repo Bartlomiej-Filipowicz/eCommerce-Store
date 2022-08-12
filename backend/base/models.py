@@ -1,4 +1,5 @@
 from email.mime import image
+from email.policy import default
 from itertools import product
 from operator import truediv
 from re import T
@@ -15,7 +16,7 @@ class Product(models.Model): # <- thanks to this inheritance Djnago knows that P
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) # a user can have multiple products (one-to-many relationship)
     # ^^^ I set 'on_delete' to SET_NULL, because I do not want to delete a product when a user is deleted(it sets the reference to NULL)
     name = models.CharField(max_length=200, null=True, blank=True)
-    image = models.ImageField(null=True, blank=True)
+    image = models.ImageField(null=True, blank=True, default='/placeholder.png')
     brand = models.CharField(max_length=200, null=True, blank=True) # null=True -> Django will store empty values as NULL in the database
     category = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
