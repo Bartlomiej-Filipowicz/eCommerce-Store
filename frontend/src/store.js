@@ -27,6 +27,7 @@ import {
     orderPayReducer, 
     orderListMyReducer,
     orderListReducer,
+    orderDeliverReducer,
 } from './reducers/orderReducers'
 
 const reducer = combineReducers({
@@ -51,6 +52,7 @@ const reducer = combineReducers({
     orderPay: orderPayReducer,
     orderListMy: orderListMyReducer,
     orderList: orderListReducer,
+    orderDeliver: orderDeliverReducer,
 })
 
 // if there are no products in a cart, return an empty array

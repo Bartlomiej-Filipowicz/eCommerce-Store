@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { PayPalButton } from 'react-paypal-button-v2'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
-import { getOrderDetails, payOrder } from '../actions/orderActions'
-import { ORDER_PAY_RESET } from '../constants/orderConstants'
+import { getOrderDetails, payOrder, deliverOrder } from '../actions/orderActions'
+import { ORDER_PAY_RESET, ORDER_DELIVER_RESET } from '../constants/orderConstants'
 
 
 function OrderScreen() {
@@ -23,6 +23,12 @@ function OrderScreen() {
 
     const orderPay = useSelector(state => state.orderPay)
     const { loading: loadingPay, success: successPay } = orderPay
+
+    const orderDeliver = useSelector(state => state.orderDeliver)
+    const { loading: loadingDeliver, success: successDeliver } = orderDeliver
+
+    const userLogin = useSelector(state => state.userLogin)
+    const { userInfo } = userLogin
 
     //////////const itemsPrice = cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2) // it doesn't update the store, it's only for this page
     //cart.itemsPrice = cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)  <- old version
@@ -44,12 +50,20 @@ function OrderScreen() {
         document.body.appendChild(script)
     }
 
+    const navigate = useNavigate()  //replaces history
+
     // navigate() should be inside useEffect(), because when it was outside it didn't work
     useEffect(() => {
 
-        if (!order || successPay || order._id !== Number(orderId) ) {
+        if (!userInfo) {
+            navigate('/login')  // replaces history.push()
+        }
+
+        if (!order || successPay || order._id !== Number(orderId) || successDeliver ) {
 
             dispatch({ type: ORDER_PAY_RESET })
+            dispatch({ type: ORDER_DELIVER_RESET })
+
             dispatch(getOrderDetails(orderId))
         }
         else if (!order.isPaid) {
@@ -61,11 +75,15 @@ function OrderScreen() {
             }
         }
         
-    }, [dispatch, order, orderId, successPay])
+    }, [dispatch, order, orderId, successPay, successDeliver])
 
 
     const successPaymentHandler = (paymentResult) => {
         dispatch(payOrder(orderId, paymentResult))
+    }
+
+    const deliverHandler = () => {
+        dispatch(deliverOrder(order))
     }
    
 
@@ -97,7 +115,7 @@ function OrderScreen() {
                             </p>
 
                             {order.isDelivered ? (
-                                <Message variant='success'>Delivered on {order.deliveredAt}</Message>
+                                <Message variant='success'>Delivered on {order.deliveredAt.substring(0, 10)}</Message>
                                 ) : (
                                     <Message variant='primary'>Not Delivered</Message>
                                 )}
@@ -201,8 +219,22 @@ function OrderScreen() {
                                         )}
                                 </ListGroup.Item>
                             )}
-                            
+                        
 
+                            {loadingDeliver && <Loader />}
+                            {userInfo && userInfo.isAdmin && order.isPaid && !order.isDelivered && (
+                                <ListGroup.Item className='mt-3'>
+                                    <div className="d-grid gap-2">
+                                        <Button
+                                            type='button'
+                                            size='lg'
+                                            onClick={deliverHandler}
+                                        >
+                                            <strong>Mark As Delivered</strong>
+                                        </Button>
+                                    </div>
+                                </ListGroup.Item>
+                            )}
                         </ListGroup>
                     </Card>
                 </Col>
