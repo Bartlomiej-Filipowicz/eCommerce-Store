@@ -177,7 +177,7 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
                 Authorization: `Bearer ${userInfo.token}`
             }
         }
-
+        // eslint-disable-next-line
         const { data } = await axios.delete(
             `/api/products/delete/${id}/`,
             config

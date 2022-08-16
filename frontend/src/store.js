@@ -1,9 +1,7 @@
 // this is a store in redux pattern
 
-import {  combineReducers, applyMiddleware } from 'redux'
+import {  combineReducers } from 'redux'
 import { configureStore } from '@reduxjs/toolkit'
-import thunk from 'redux-thunk'
-import { composeWithDevTools } from 'redux-devtools-extension'
 import { 
     productListReducer, 
     productDetailsReducer, 

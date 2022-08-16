@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'// react router dom is a react library that enables loading components on a website(SPA), instead of redirecting to a new page 
 import { useDispatch, useSelector } from 'react-redux'
-import { Row, Col, Image, ListGroup, Button, Card, Form, ListGroupItem } from 'react-bootstrap'
+import { Row, Col, Image, ListGroup, Button, Card, Form } from 'react-bootstrap'
 import Rating from '../components/Rating'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
@@ -176,7 +176,7 @@ function ProductScreen() {
                         <Row>
                           <Button
                           onClick={addToCartHandler}
-                          className='btn-block' disabled={product.countInStock == 0}
+                          className='btn-block' disabled={product.countInStock === 0}
                           size='lg'
                           type='button'><strong>Add to cart</strong></Button>
                         </Row>

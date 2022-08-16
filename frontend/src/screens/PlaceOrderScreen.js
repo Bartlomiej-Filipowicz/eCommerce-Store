@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Button, Row, Col, ListGroup, Image, Card, Container } from 'react-bootstrap'
+import React, { useEffect } from 'react'
+import { Button, Row, Col, ListGroup, Image, Card } from 'react-bootstrap'
 import { useNavigate, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Message from '../components/Message'
