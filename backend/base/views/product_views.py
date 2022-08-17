@@ -31,7 +31,13 @@ from .. import serializers
 
 @api_view(['GET'])
 def getProducts(request):
-    products = Product.objects.all() # it takes data from the database, because Product is a model
+    query = request.query_params.get('keyword') # for search box functionality
+
+    if query == None:
+        query = ''
+
+    products = Product.objects.filter(name__icontains = query) # it takes data from the database, because Product is a model
+    # ^^ it's looking for a word(from query) in a name of products and is case-insensitive 
     serializer = ProductSerializer(products, many=True) # 'many=True' means that I'm passing multiple objects
     # return Response(products) <- it's incorrect because the Product object is NOT serialized
     return Response(serializer.data) # now the data comes from the database
