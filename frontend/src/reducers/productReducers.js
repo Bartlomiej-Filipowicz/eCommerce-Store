@@ -38,7 +38,12 @@ export const productListReducer = (state = { products: []}, action) => {
             //^^^ by setting 'loading' to 'true' I'm letting users know that their request is being executed
 
         case PRODUCT_LIST_SUCCESS: // it returned data
-            return { loading: false, products: action.payload } // I get action.payload from an API
+            return { 
+                loading: false, 
+                products: action.payload.products, 
+                page: action.payload.page, 
+                pages: action.payload.pages 
+            } // I get action.payload from an API
 
         case PRODUCT_LIST_FAIL:
             return { loading: false, error: action.payload }

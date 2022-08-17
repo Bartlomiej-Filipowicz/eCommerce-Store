@@ -6,6 +6,7 @@ import Product from '../components/Product'
 import { listProducts } from '../actions/productActions'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
+import Paginate from '../components/Paginate'
 
 
 
@@ -35,8 +36,7 @@ function HomeScreen() {
   const dispatch = useDispatch()
 
   const productList = useSelector(state => state.productList) // state.productList is from store.js (reducer)
-
-  const {error, loading, products} = productList
+  const {error, loading, products, page, pages} = productList
 
   const location = useLocation()  // replaces history.location
   let keyword = location.search
@@ -54,8 +54,9 @@ function HomeScreen() {
         <h1>Latest Products</h1>
         {loading ? <Loader/>
         : error ? <Message variant='danger'>{error}</Message>
-        : <Row> 
-        
+        : 
+        <div>
+          <Row> 
             {products.map(product => ( 
                 <Col key={product._id} sm={12} md={6} lg={4} xl={3}>  {// <- making it responsive
                 }
@@ -63,6 +64,9 @@ function HomeScreen() {
                 </Col>
             ))}
           </Row>
+          
+          <Paginate page={page} pages={pages} keyword={keyword} />
+        </div>
         }
         
     </div>

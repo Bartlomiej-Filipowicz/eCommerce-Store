@@ -1,22 +1,36 @@
 import React, { useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 
 function SearchBox() {
 
     const [keyword, setKeyword] = useState('')
+    const [placeholder, setPlaceholder] = useState('Search')
 
     const navigate = useNavigate()  // replaces history
 
-    const location = useLocation()  // replaces history.location
+    function resolveAfter2Seconds(x) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(x);
+          }, 2000);
+        });
+    }
+      
+    async function f1() {
+        // eslint-disable-next-line
+        const x = await resolveAfter2Seconds(10);
+        setPlaceholder('Search')
+    }
 
     const submitHandler = (e) => {
         e.preventDefault() 
         if (keyword) {
-            navigate(`/?keyword=${keyword}`)  // replaces history.push()
+            navigate(`/?keyword=${keyword}&page=1`)  // replaces history.push()
         } else {
-            navigate(navigate(location.pathname))
+            setPlaceholder('Type something :)')
+            f1()
         }  
     }
 
@@ -26,7 +40,7 @@ function SearchBox() {
                 type='text'
                 name='q'
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder='Search'
+                placeholder={placeholder}
                 className="w-150"
             ></Form.Control>
         

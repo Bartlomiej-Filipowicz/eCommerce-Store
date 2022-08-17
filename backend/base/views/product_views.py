@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from base.models import Product, Review
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from rest_framework import status
 
@@ -38,9 +39,25 @@ def getProducts(request):
 
     products = Product.objects.filter(name__icontains = query) # it takes data from the database, because Product is a model
     # ^^ it's looking for a word(from query) in a name of products and is case-insensitive 
+
+    page = request.query_params.get('page')
+    paginator = Paginator(products, 4)  # 2 items for each page
+
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+
     serializer = ProductSerializer(products, many=True) # 'many=True' means that I'm passing multiple objects
     # return Response(products) <- it's incorrect because the Product object is NOT serialized
-    return Response(serializer.data) # now the data comes from the database
+    return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages}) # now the data comes from the database
 
 @api_view(['GET'])
 def getProduct(request, pk): # pk stands for primary key
