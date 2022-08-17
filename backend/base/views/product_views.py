@@ -59,6 +59,16 @@ def getProducts(request):
     # return Response(products) <- it's incorrect because the Product object is NOT serialized
     return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages}) # now the data comes from the database
 
+
+
+@api_view(['GET'])
+def getTopProducts(request):
+    products = Product.objects.filter(rating__gte=4).order_by('-rating')[0:5]
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+
+
 @api_view(['GET'])
 def getProduct(request, pk): # pk stands for primary key
     product = Product.objects.get(_id=pk)

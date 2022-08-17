@@ -9,7 +9,9 @@ import {
     productCreateReducer,
     productUpdateReducer, 
     productReviewCreateReducer,
+    productTopRatedReducer,
 } from './reducers/productReducers'
+
 import { cartReducer } from './reducers/cartReducers'
 import { 
     userLoginReducer, 
@@ -20,6 +22,7 @@ import {
     userDeleteReducer,
     userUpdateReducer,
 } from './reducers/userReducers'
+
 import { 
     orderCreateReducer, 
     orderDetailsReducer, 
@@ -36,6 +39,7 @@ const reducer = combineReducers({
     productCreate: productCreateReducer,
     productUpdate: productUpdateReducer,
     productReviewCreate: productReviewCreateReducer,
+    productTopRated: productTopRatedReducer,
     
     cart: cartReducer,               // cart is a state
 
