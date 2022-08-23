@@ -15,19 +15,26 @@
 ## General info
 eCommerce Store is a web application, where customers can create an account, log in, go through products and place order of desired products.
 
-The store consists of a homepage (where all products are displayed), a page of a single product, a cart page, a user account functionality, logging in, registering a new user, a user profile page, updating user profile, a checkout functionality and an admin screen (coming soon).
+The store consists of a homepage (where all products are displayed), a page of a single product, a cart page, a user account functionality, logging in, registering a new user, a user profile page, updating user profile, a checkout functionality and an admin screen.
 
 This is a training project. The goal was to practice use of **Django**, **PostgreSQL** and **React** in a real project.
 
 ## Features
 - Creating an account
 - Logging in & out
-- Updating user details
+- User profile with listed orders
+- Top products carousel
 - Browsing products
+- Product reviews and ratings
+- Product pagination
 - Adding products to a cart
 - Placing order
-- Ability to manage users (for admins) [soon]
-- Ability to manage products (for admins) [soon]
+- PayPal / credit card integration
+- Product search feature
+- Ability to manage users (for admins)
+- Ability to manage products (for admins)
+- Order details page (for admins)
+- Mark orders as delivered option (for admins)
 
 ## Technologies
 - Python 3.10.2
@@ -52,13 +59,40 @@ To launch **React** server on a local machine (in the **frontend** folder):
 The project will be soon deployed to a live server.
 
 ## Illustrations
-![image](https://user-images.githubusercontent.com/96448777/182486302-2a0fae46-8626-435a-8dd4-0defe74a7485.png)
+![image](https://user-images.githubusercontent.com/96448777/185259109-bfe8c106-d125-497d-96fe-332787306d43.png)
 
-![image](https://user-images.githubusercontent.com/96448777/182486475-0ee9bc08-2a62-4a1c-a992-10143b301a34.png)
+![image](https://user-images.githubusercontent.com/96448777/185259243-3fe589a4-6fab-4147-a2bf-80224d51ec8a.png)
 
-![image](https://user-images.githubusercontent.com/96448777/182486644-9ffc0809-9570-405a-b075-c83b81ad5b49.png)
+![image](https://user-images.githubusercontent.com/96448777/185259337-d606b8f0-12e8-4318-9103-8b0216553695.png)
 
-![image](https://user-images.githubusercontent.com/96448777/182486714-fa7293a4-0928-49d4-9679-8ffc4cd4a9e8.png)
+![image](https://user-images.githubusercontent.com/96448777/185259736-bcbea413-708c-42c4-afeb-92edf9bf58b6.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185259991-cb37e260-3508-42a0-bd6e-4cd1cdc342bd.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185260218-fba27012-7a28-452e-9f4d-ab95c93bded8.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185260292-5dbd77e1-b006-483e-bd38-d7229a84f8e6.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185260347-4e3296ad-43d9-41b8-af0c-1485d2d39c4e.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185260425-ca1c3c19-710f-4669-88a5-3bc942b1dc58.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185260987-5b732d66-e775-4f5c-a602-52ca8406ecc7.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185261168-1f9a9751-4d56-4c93-aeb1-06e99029569c.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185261282-c3ba8279-2782-4c63-a3d1-35530362cd35.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185261600-301fd867-8e13-4108-a200-afc1a7a46704.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185261726-b6ae050f-88c0-4c5c-bfe2-051c34b48b2e.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185262079-b78fb4ac-a49b-4fc3-aba1-0b00b01ef432.png)
+
+![image](https://user-images.githubusercontent.com/96448777/185262253-de70f3ea-ac5a-4127-829b-d62466626abd.png)
+
+
+
 
 ## Technical overview
 **Frontend**: React is used to build a frontend part of the store. The application is a SPA: appropiate screens are loaded from App.js. The app takes advantage of Redux for updating states of components. According to Redux pattern I set up a store, which is a kind of client-side database. When there is an event on a website, an action is dispatched to a reducer and that reducer updates the store. That cycle handles states of components of the app.
@@ -66,7 +100,7 @@ The project will be soon deployed to a live server.
 **Backend**: Backend part is mainly located in Django app called 'base'. Frontend and backend are communicating with each other using REST APIs (Django REST Framework comes here in handy). Web requests from frontend are handled by view functions which return web respones back to frontend. The urls files assign URLs to appropriate views. Postgres is used for database management. Connection with database is realized by using models.py file, where models are defined. Every model is a class. Every class is a database table. Attributes in those classes are database table columns.
 
 ## The project status
-The project is in the last phase of development. A checkout functionality and admin screen are being developed currently. The project will be soon finished and deployed to a live server.
+The development of the project is finished. The project will be soon deployed to a live server.
 
 ## Other information
 Author [**Bartłomiej Filipowicz**](https://github.com/Bartlomiej-Filipowicz)
