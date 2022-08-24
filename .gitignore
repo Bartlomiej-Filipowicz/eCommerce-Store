@@ -1,0 +1,6 @@
+.vscode
+backend/backend/__pycache__/
+backend/base/__pycache__/
+backend/base/migrations/__pycache__/
+backend/base/urls/__pycache__/
+backend/base/views/__pycache__/
