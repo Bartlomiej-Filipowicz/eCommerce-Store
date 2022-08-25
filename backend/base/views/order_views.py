@@ -45,7 +45,7 @@ def addOrderItems(request):
         # 3. Create OrderItem models and set Order to OrderItem relationship
 
         for i in orderItems:
-            product = Product.objects.get(_id=i["product"])  # product is an id
+            product = Product.objects.get(id=i["product"])  # product is an id
 
             item = OrderItem.objects.create(
                 product=product,
@@ -92,7 +92,7 @@ def getOrderById(request, pk):  # pk - primary key
     user = request.user
 
     try:
-        order = Order.objects.get(_id=pk)
+        order = Order.objects.get(id=pk)
         if user.is_staff or order.user == user:
             serializer = OrderSerializer(order, many=False)
             return Response(serializer.data)
@@ -110,7 +110,7 @@ def getOrderById(request, pk):  # pk - primary key
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def updateOrderToPaid(request, pk):
-    order = Order.objects.get(_id=pk)
+    order = Order.objects.get(id=pk)
 
     order.isPaid = True
     order.paidAt = datetime.now()
@@ -122,7 +122,7 @@ def updateOrderToPaid(request, pk):
 @api_view(["PUT"])
 @permission_classes([IsAdminUser])
 def updateOrderToDelivered(request, pk):
-    order = Order.objects.get(_id=pk)
+    order = Order.objects.get(id=pk)
 
     order.isDelivered = True
     order.deliveredAt = datetime.now()

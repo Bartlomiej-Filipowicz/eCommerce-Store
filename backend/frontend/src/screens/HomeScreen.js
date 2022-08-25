@@ -1,15 +1,13 @@
-import React, { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import { Row, Col } from 'react-bootstrap'
-import { useDispatch, useSelector } from 'react-redux'
-import Product from '../components/Product'
-import { listProducts } from '../actions/productActions'
-import Loader from '../components/Loader'
-import Message from '../components/Message'
-import Paginate from '../components/Paginate'
-import ProductCarousel from '../components/ProductCarousel'
-
-
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { Row, Col } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import Product from "../components/Product";
+import { listProducts } from "../actions/productActions";
+import Loader from "../components/Loader";
+import Message from "../components/Message";
+import Paginate from "../components/Paginate";
+import ProductCarousel from "../components/ProductCarousel";
 
 function HomeScreen() {
   // state of a component -> the data being used in that component at that point in time
@@ -34,47 +32,46 @@ function HomeScreen() {
   }, [])
   ^^^^^^^^^^^^^^^^^^previous version before redux^^^^^^^^^^^^^^^^^^^    */
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const productList = useSelector(state => state.productList) // state.productList is from store.js (reducer)
-  const {error, loading, products, page, pages} = productList
+  const productList = useSelector((state) => state.productList); // state.productList is from store.js (reducer)
+  const { error, loading, products, page, pages } = productList;
 
-  const location = useLocation()  // replaces history.location
-  let keyword = location.search
+  const location = useLocation(); // replaces history.location
+  let keyword = location.search;
 
   useEffect(() => {
-    
-    dispatch(listProducts(keyword))
-    
-  }, [dispatch, keyword])
-
-
+    dispatch(listProducts(keyword));
+  }, [dispatch, keyword]);
 
   return (
     <div>
+      {!keyword && <ProductCarousel />}
 
-        { !keyword && <ProductCarousel /> }
-
-        <h1>Latest Products</h1>
-        {loading ? <Loader/>
-        : error ? <Message variant='danger'>{error}</Message>
-        : 
+      <h1>Latest Products</h1>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
         <div>
-          <Row> 
-            {products.map(product => ( 
-                <Col key={product._id} sm={12} md={6} lg={4} xl={3}>  {// <- making it responsive
+          <Row>
+            {products.map((product) => (
+              <Col key={product.id} sm={12} md={6} lg={4} xl={3}>
+                {" "}
+                {
+                  // <- making it responsive
                 }
-                    <Product product={product} />
-                </Col>
+                <Product product={product} />
+              </Col>
             ))}
           </Row>
-          
+
           <Paginate page={page} pages={pages} keyword={keyword} />
         </div>
-        }
-        
+      )}
     </div>
-  )
+  );
 }
 
-export default HomeScreen
+export default HomeScreen;

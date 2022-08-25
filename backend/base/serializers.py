@@ -11,14 +11,14 @@ from .models import Order, OrderItem, Product, Review, ShippingAddress
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)  # custom field
-    _id = serializers.SerializerMethodField(read_only=True)  # custom field
+    id = serializers.SerializerMethodField(read_only=True)  # custom field
     isAdmin = serializers.SerializerMethodField(read_only=True)  # custom field
 
     class Meta:
         model = User
-        fields = ["id", "_id", "username", "email", "name", "isAdmin"]
+        fields = ["id", "username", "email", "name", "isAdmin"]
 
-    def get__id(self, obj):
+    def get_id(self, obj):
         return obj.id
 
     def get_isAdmin(self, obj):
@@ -41,7 +41,7 @@ class UserSerializerWithToken(UserSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "_id", "username", "email", "name", "isAdmin", "token"]
+        fields = ["id", "username", "email", "name", "isAdmin", "token"]
 
     def get_token(self, obj):
         token = RefreshToken.for_user(obj)

@@ -29,7 +29,7 @@ class Product(
     createdAt = models.DateTimeField(
         auto_now_add=True
     )  # takes the date and time the moment an object is created
-    _id = models.AutoField(primary_key=True, editable=False)
+    id = models.AutoField(primary_key=True, editable=False)
 
     def __str__(self) -> str:
         return self.name
@@ -42,7 +42,7 @@ class Review(models.Model):
     rating = models.IntegerField(null=True, blank=True, default=0)
     comment = models.TextField(null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
-    _id = models.AutoField(primary_key=True, editable=False)
+    id = models.AutoField(primary_key=True, editable=False)
 
     def __str__(self) -> str:
         return str(self.rating)
@@ -65,7 +65,7 @@ class Order(models.Model):
     isDelivered = models.BooleanField(default=False)
     deliveredAt = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
-    _id = models.AutoField(primary_key=True, editable=False)
+    id = models.AutoField(primary_key=True, editable=False)
 
     def __str__(self) -> str:
         return str(self.createdAt)
@@ -78,7 +78,7 @@ class OrderItem(models.Model):
     qty = models.IntegerField(null=True, blank=True, default=0)
     price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     image = models.CharField(max_length=200, null=True, blank=True)
-    _id = models.AutoField(primary_key=True, editable=False)
+    id = models.AutoField(primary_key=True, editable=False)
 
     def __str__(self) -> str:
         return str(self.name)
@@ -96,7 +96,7 @@ class ShippingAddress(models.Model):
     shippingPrice = models.DecimalField(
         max_digits=7, decimal_places=2, null=True, blank=True
     )
-    _id = models.AutoField(primary_key=True, editable=False)
+    id = models.AutoField(primary_key=True, editable=False)
 
     def __str__(self) -> str:
         return str(self.address)
