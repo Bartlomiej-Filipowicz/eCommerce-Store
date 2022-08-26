@@ -69,6 +69,9 @@ def updateUserProfile(request):
     if data["password"] != "":
         user.password = make_password(data["password"])
 
+    if user.email != "":
+        user.username = user.email
+
     user.save()
 
     # return Response(user) <- it's incorrect because it's NOT serialized
@@ -121,6 +124,9 @@ def updateUser(request, pk):
     user.username = data["email"]
     user.email = data["email"]
     user.is_staff = data["isAdmin"]
+
+    if user.email != "":
+        user.username = user.email
 
     user.save()
 
