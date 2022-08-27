@@ -3,129 +3,141 @@ from datetime import datetime
 from base.models import Order, OrderItem, Product, ShippingAddress
 from base.serializers import OrderSerializer
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def addOrderItems(request):
+class UserOrders(APIView):
+    """
+    Handling orders for users
+    """
 
-    user = request.user
-    data = request.data
+    permission_classes = [IsAuthenticated]
 
-    orderItems = data["orderItems"]
+    def post(self, request, format=None):
+        # add order items
 
-    if orderItems and len(orderItems) == 0:
-        return Response(
-            {"detail": "No Order Items"}, status=status.HTTP_400_BAD_REQUEST
-        )
-    else:
-        # 1. Create Order model
+        user = request.user
+        data = request.data
 
-        order = Order.objects.create(
-            user=user,
-            paymentMethod=data["paymentMethod"],
-            taxPrice=data["taxPrice"],
-            shippingPrice=data["shippingPrice"],
-            totalPrice=data["totalPrice"],
-        )
+        orderItems = data["orderItems"]
 
-        # 2. Create ShippingAddress model
+        if orderItems and len(orderItems) == 0:
+            return Response(
+                {"detail": "No Order Items"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            # 1. Create Order model
 
-        shipping = ShippingAddress.objects.create(
-            order=order,
-            address=data["shippingAddress"]["address"],
-            city=data["shippingAddress"]["city"],
-            postalCode=data["shippingAddress"]["postalCode"],
-            country=data["shippingAddress"]["country"],
-        )
-
-        # 3. Create OrderItem models and set Order to OrderItem relationship
-
-        for i in orderItems:
-            product = Product.objects.get(id=i["product"])  # product is an id
-
-            item = OrderItem.objects.create(
-                product=product,
-                order=order,
-                name=product.name,
-                qty=i["qty"],
-                price=i["price"],
-                image=product.image.url,
+            order = Order.objects.create(
+                user=user,
+                paymentMethod=data["paymentMethod"],
+                taxPrice=data["taxPrice"],
+                shippingPrice=data["shippingPrice"],
+                totalPrice=data["totalPrice"],
             )
 
-            # 4. Update stock
+            # 2. Create ShippingAddress model
 
-            product.countInStock -= item.qty
-            product.save()
+            shipping = ShippingAddress.objects.create(
+                order=order,
+                address=data["shippingAddress"]["address"],
+                city=data["shippingAddress"]["city"],
+                postalCode=data["shippingAddress"]["postalCode"],
+                country=data["shippingAddress"]["country"],
+            )
 
-        serializer = OrderSerializer(order, many=False)
+            # 3. Create OrderItem models and set Order to OrderItem relationship
+
+            for i in orderItems:
+                product = Product.objects.get(id=i["product"])  # product is an id
+
+                item = OrderItem.objects.create(
+                    product=product,
+                    order=order,
+                    name=product.name,
+                    qty=i["qty"],
+                    price=i["price"],
+                    image=product.image.url,
+                )
+
+                # 4. Update stock
+
+                product.countInStock -= item.qty
+                product.save()
+
+            serializer = OrderSerializer(order, many=False)
+
+            return Response(serializer.data)
+
+    def get(self, request, pk, format=None):
+        # get order by Id
+
+        user = request.user
+
+        try:
+            order = Order.objects.get(id=pk)
+            if user.is_staff or order.user == user:
+                serializer = OrderSerializer(order, many=False)
+                return Response(serializer.data)
+            else:
+                Response(
+                    {"detail": "Not authorized to view this order"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except Order.DoesNotExist:
+            return Response(
+                {"detail": "Order does not exist"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def put(self, request, pk, format=None):
+        # update order to paid
+        order = Order.objects.get(id=pk)
+
+        order.isPaid = True
+        order.paidAt = datetime.now()
+        order.save()
+
+        return Response("Order was paid")
+
+
+class MyOrders(APIView):
+    """
+    Getting all user's orders
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        # get my orders
+
+        user = request.user
+        orders = user.order_set.all()
+        serializer = OrderSerializer(orders, many=True)
 
         return Response(serializer.data)
 
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def getMyOrders(request):
+class AdminOrders(APIView):
+    """
+    Handling orders for admins
+    """
 
-    user = request.user
-    orders = user.order_set.all()
-    serializer = OrderSerializer(orders, many=True)
+    permission_classes = [IsAdminUser]
 
-    return Response(serializer.data)
+    def get(self, request, format=None):
+        # get orders
+        orders = Order.objects.all()
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
 
-
-@api_view(["GET"])
-@permission_classes([IsAdminUser])
-def getOrders(request):
-    orders = Order.objects.all()
-    serializer = OrderSerializer(orders, many=True)
-    return Response(serializer.data)
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def getOrderById(request, pk):  # pk - primary key
-
-    user = request.user
-
-    try:
+    def put(self, request, pk, format=None):
+        # update order to delivered
         order = Order.objects.get(id=pk)
-        if user.is_staff or order.user == user:
-            serializer = OrderSerializer(order, many=False)
-            return Response(serializer.data)
-        else:
-            Response(
-                {"detail": "Not authorized to view this order"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-    except Order.DoesNotExist:
-        return Response(
-            {"detail": "Order does not exist"}, status=status.HTTP_400_BAD_REQUEST
-        )
 
+        order.isDelivered = True
+        order.deliveredAt = datetime.now()
+        order.save()
 
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])
-def updateOrderToPaid(request, pk):
-    order = Order.objects.get(id=pk)
-
-    order.isPaid = True
-    order.paidAt = datetime.now()
-    order.save()
-
-    return Response("Order was paid")
-
-
-@api_view(["PUT"])
-@permission_classes([IsAdminUser])
-def updateOrderToDelivered(request, pk):
-    order = Order.objects.get(id=pk)
-
-    order.isDelivered = True
-    order.deliveredAt = datetime.now()
-    order.save()
-
-    return Response("Order was delivered")
+        return Response("Order was delivered")

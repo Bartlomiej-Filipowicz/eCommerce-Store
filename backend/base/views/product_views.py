@@ -2,161 +2,184 @@ from base.models import Product, Review
 from base.serializers import ProductSerializer
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# A view function takes a web request and returns a web response.
-
-# Create your views here.
-
-
-@api_view(["GET"])
-def getProducts(request):
-    query = request.query_params.get("keyword")  # for search box functionality
-
-    if query is None:
-        query = ""
-
-    products = Product.objects.filter(
-        name__icontains=query
-    )  # it takes data from the database, because Product is a model
-    # ^^ it's looking for a word(from query) in a name of products
-    # and is case-insensitive
-
-    page = request.query_params.get("page")
-    paginator = Paginator(products, 4)  # 2 items for each page
-
-    try:
-        products = paginator.page(page)
-    except PageNotAnInteger:
-        products = paginator.page(1)
-    except EmptyPage:
-        products = paginator.page(paginator.num_pages)
-
-    if page is None:
-        page = 1
-
-    page = int(page)
-
-    serializer = ProductSerializer(products, many=True)
-    # 'many=True' means that I'm passing multiple objects
-    # return Response(products) <- it's incorrect because
-    # the Product object is NOT serialized
-    return Response(
-        {"products": serializer.data, "page": page, "pages": paginator.num_pages}
-    )  # now the data comes from the database
+# A view takes a web request and returns a web response.
 
 
-@api_view(["GET"])
-def getTopProducts(request):
-    products = Product.objects.filter(rating__gte=4).order_by("-rating")[0:5]
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
+class GetProducts(APIView):
+    """
+    Return a set of products
+    """
 
+    def get(self, request, format=None):
+        # get products
+        query = request.query_params.get("keyword")  # for search box functionality
 
-@api_view(["GET"])
-def getProduct(request, pk):  # pk stands for primary key
-    product = Product.objects.get(id=pk)
-    serializer = ProductSerializer(product, many=False)
-    return Response(serializer.data)  # now the data comes from the database
+        if query is None:
+            query = ""
 
+        products = Product.objects.filter(name__icontains=query)
+        # ^^ it's looking for a word(from query) in a name of products
+        # and is case-insensitive
 
-@api_view(["POST"])
-@permission_classes([IsAdminUser])
-def createProduct(request):
-    user = request.user
+        page = request.query_params.get("page")
+        paginator = Paginator(products, 4)  # 4 items for each page
 
-    product = Product.objects.create(
-        user=user,
-        name="Sample Name",
-        price=0,
-        brand="Sample Brand",
-        countInStock=0,
-        category="Sample Category",
-        description="",
-    )
+        try:
+            products = paginator.page(page)
+        except PageNotAnInteger:
+            products = paginator.page(1)
+        except EmptyPage:
+            products = paginator.page(paginator.num_pages)
 
-    serializer = ProductSerializer(product, many=False)
-    return Response(serializer.data)
+        if page is None:
+            page = 1
 
+        page = int(page)
 
-@api_view(["PUT"])
-@permission_classes([IsAdminUser])
-def updateProduct(request, pk):
-    data = request.data
-    product = Product.objects.get(id=pk)
-
-    product.name = data["name"]
-    product.price = data["price"]
-    product.brand = data["brand"]
-    product.countInStock = data["countInStock"]
-    product.category = data["category"]
-    product.description = data["description"]
-
-    product.save()
-
-    serializer = ProductSerializer(product, many=False)
-    return Response(serializer.data)
-
-
-@api_view(["DELETE"])
-@permission_classes([IsAdminUser])
-def deleteProduct(request, pk):
-    product = Product.objects.get(id=pk)
-    product.delete()
-    return Response("Producted Deleted")
-
-
-@api_view(["POST"])
-def uploadImage(request):
-    data = request.data
-
-    product_id = data["product_id"]
-    product = Product.objects.get(id=product_id)
-
-    product.image = request.FILES.get("image")
-    product.save()
-
-    return Response("Image was uploaded")
-
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def createProductReview(request, pk):
-    user = request.user
-    product = Product.objects.get(id=pk)
-    data = request.data
-
-    # 1 - Review already exists
-    alreadyExists = product.review_set.filter(user=user).exists()
-    if alreadyExists:
-        content = {"detail": "Product already reviewed"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    # 2 - No Rating or 0
-    elif data["rating"] == 0:
-        content = {"detail": "Please select a rating"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    # 3 - Create review
-    else:
-        review = Review.objects.create(
-            user=user,
-            product=product,
-            name=user.first_name,
-            rating=data["rating"],
-            comment=data["comment"],
+        serializer = ProductSerializer(products, many=True)
+        # return Response(products) <- it's incorrect because
+        # the Product object is NOT serialized
+        return Response(
+            {"products": serializer.data, "page": page, "pages": paginator.num_pages}
         )
 
-        reviews = product.review_set.all()
-        product.numReviews = len(reviews)
 
-        total = 0
-        for i in reviews:
-            total += i.rating
+class TopProducts(APIView):
+    """
+    Getting top products for the carousel
+    """
 
-        product.rating = total / len(reviews)
+    def get(self, request, format=None):
+        # get top products
+        products = Product.objects.filter(rating__gte=4).order_by("-rating")[0:5]
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+
+class GetProduct(APIView):
+    """
+    Getting a single product
+    """
+
+    def get(self, request, pk, format=None):
+        # get product
+        product = Product.objects.get(id=pk)
+        serializer = ProductSerializer(product, many=False)
+        return Response(serializer.data)
+
+
+class AdminProducts(APIView):
+    """
+    Handling products for admins
+    """
+
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, format=None):
+        # create product
+        user = request.user
+
+        product = Product.objects.create(
+            user=user,
+            name="Sample Name",
+            price=0,
+            brand="Sample Brand",
+            countInStock=0,
+            category="Sample Category",
+            description="",
+        )
+
+        serializer = ProductSerializer(product, many=False)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        # update product
+        data = request.data
+        product = Product.objects.get(id=pk)
+
+        product.name = data["name"]
+        product.price = data["price"]
+        product.brand = data["brand"]
+        product.countInStock = data["countInStock"]
+        product.category = data["category"]
+        product.description = data["description"]
+
         product.save()
 
-        return Response("Review Added")
+        serializer = ProductSerializer(product, many=False)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, format=None):
+        # delete product
+        product = Product.objects.get(id=pk)
+        product.delete()
+        return Response("Producted Deleted")
+
+
+class UploadImage(APIView):
+    """
+    Uploading an image for a product
+    """
+
+    def post(self, request, format=None):
+        # upload image
+        data = request.data
+
+        product_id = data["product_id"]
+        product = Product.objects.get(id=product_id)
+
+        product.image = request.FILES.get("image")
+        product.save()
+
+        return Response("Image was uploaded")
+
+
+class ProductReview(APIView):
+    """
+    Creating a product review
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk, format=None):
+        # create product review
+        user = request.user
+        product = Product.objects.get(id=pk)
+        data = request.data
+
+        # 1 - Review already exists
+        alreadyExists = product.review_set.filter(user=user).exists()
+        if alreadyExists:
+            content = {"detail": "Product already reviewed"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2 - No Rating or 0
+        elif data["rating"] == 0:
+            content = {"detail": "Please select a rating"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3 - Create review
+        else:
+            review = Review.objects.create(
+                user=user,
+                product=product,
+                name=user.first_name,
+                rating=data["rating"],
+                comment=data["comment"],
+            )
+
+            reviews = product.review_set.all()
+            product.numReviews = len(reviews)
+
+            total = 0
+            for i in reviews:
+                total += i.rating
+
+            product.rating = total / len(reviews)
+            product.save()
+
+            return Response("Review Added")

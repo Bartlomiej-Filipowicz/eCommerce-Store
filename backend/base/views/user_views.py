@@ -2,13 +2,13 @@ from base.serializers import UserSerializer, UserSerializerWithToken
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User  # User is a model/database table
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-# A view function takes a web request and returns a web response.
+# A view takes a web request and returns a web response.
 
 # I create a serializer for every single model that I want to return,
 # a serializer is going to wrap my model and turn that model into a JSON format
@@ -33,111 +33,129 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-@api_view(["POST"])
-def registerUser(request):
-    data = request.data
+class RegisterUser(APIView):
+    """
+    Creating a new account
+    """
 
-    try:
-        user = User.objects.create(
-            first_name=data["name"],
-            username=data["email"],
-            email=data["email"],
-            password=make_password(data["password"]),
-        )
-        serializer = UserSerializerWithToken(user, many=False)
+    def post(self, request, format=None):
+        # register user
+        data = request.data
+
+        try:
+            user = User.objects.create(
+                first_name=data["name"],
+                username=data["email"],
+                email=data["email"],
+                password=make_password(data["password"]),
+            )
+            serializer = UserSerializerWithToken(user, many=False)
+            return Response(serializer.data)
+
+        except:
+            message = {"detail": "User with this email already exists :("}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfile(APIView):
+    """
+    Handling user profile
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, format=None):
+        # update user profile
+        user = request.user
+        serializer = UserSerializerWithToken(
+            user, many=False
+        )  # 'many=False' means that I want to obtain one user
+
+        data = request.data
+
+        user.first_name = data["name"]
+        user.username = data["email"]
+        user.email = data["email"]
+
+        if data["password"] != "":
+            user.password = make_password(data["password"])
+
+        if user.email != "":
+            user.username = user.email
+
+        user.save()
+
+        # return Response(user) <- it's incorrect because it's NOT serialized
         return Response(serializer.data)
 
-    except:
-        message = {"detail": "User with this email already exists :("}
-        return Response(message, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, format=None):
+        # get user profile
+        user = request.user
+        serializer = UserSerializer(user, many=False)
+        # return Response(user) <- it's incorrect because it's NOT serialized
+        return Response(serializer.data)
 
 
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])  # protected route
-def updateUserProfile(request):
-    user = request.user
-    serializer = UserSerializerWithToken(
-        user, many=False
-    )  # 'many=False' means that I want to obtain one user
+class UpdateUser(APIView):
+    """
+    Updating user info
+    """
 
-    data = request.data
+    permission_classes = [IsAuthenticated]
 
-    user.first_name = data["name"]
-    user.username = data["email"]
-    user.email = data["email"]
+    def put(self, request, pk, format=None):
+        # update user
+        user = User.objects.get(id=pk)
 
-    if data["password"] != "":
-        user.password = make_password(data["password"])
+        data = request.data
 
-    if user.email != "":
-        user.username = user.email
+        user.first_name = data["name"]
+        user.username = data["email"]
+        user.email = data["email"]
+        user.is_staff = data["isAdmin"]
 
-    user.save()
+        if user.email != "":
+            user.username = user.email
 
-    # return Response(user) <- it's incorrect because it's NOT serialized
-    return Response(serializer.data)  # now the data comes from the database
+        user.save()
 
+        serializer = UserSerializer(user, many=False)
 
-# if token is off, then access is denied because authentication
-# credentials were not provided
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])  # protected route
-def getUserProfile(request):
-    user = request.user
-    serializer = UserSerializer(
-        user, many=False
-    )  # 'many=False' means that I want to obtain one user
-    # return Response(user) <- it's incorrect because it's NOT serialized
-    return Response(serializer.data)  # now the data comes from the database
+        return Response(serializer.data)
 
 
-@api_view(["GET"])
-@permission_classes([IsAdminUser])  # only for admins
-def getUsers(request):
-    users = (
-        User.objects.all()
-    )  # it takes data from the database, because User is a model
-    serializer = UserSerializer(
-        users, many=True
-    )  # 'many=True' means that I'm passing multiple objects
-    # return Response(users) <- it's incorrect because
-    # the User object is NOT serialized
-    return Response(serializer.data)  # now the data comes from the database
+class AdminProfile(APIView):
+    """
+    User management for admins
+    """
+
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, format=None):
+        # get users
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        # return Response(users) <- it's incorrect because
+        # the User object is NOT serialized
+        return Response(serializer.data)
+
+    def delete(self, request, pk, format=None):
+        # delete user
+        userForDeletion = User.objects.get(id=pk)
+        userForDeletion.delete()
+        return Response("User was deleted")
 
 
-@api_view(["GET"])
-@permission_classes([IsAdminUser])
-def getUserById(request, pk):
-    user = User.objects.get(id=pk)
-    serializer = UserSerializer(user, many=False)
-    return Response(serializer.data)
+class AdminProfileId(APIView):
+    """
+    User management for admins
+    Extracting a single user
+    """
 
+    permission_classes = [IsAdminUser]
 
-@api_view(["PUT"])
-@permission_classes([IsAuthenticated])
-def updateUser(request, pk):
-    user = User.objects.get(id=pk)
-
-    data = request.data
-
-    user.first_name = data["name"]
-    user.username = data["email"]
-    user.email = data["email"]
-    user.is_staff = data["isAdmin"]
-
-    if user.email != "":
-        user.username = user.email
-
-    user.save()
-
-    serializer = UserSerializer(user, many=False)
-
-    return Response(serializer.data)
-
-
-@api_view(["DELETE"])
-@permission_classes([IsAdminUser])
-def deleteUser(request, pk):
-    userForDeletion = User.objects.get(id=pk)
-    userForDeletion.delete()
-    return Response("User was deleted")
+    def get(self, request, pk, format=None):
+        # get user by id
+        user = User.objects.get(id=pk)
+        serializer = UserSerializer(user, many=False)
+        return Response(serializer.data)
