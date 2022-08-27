@@ -62,7 +62,6 @@ function ProductEditScreen() {
         id: productId,
         name,
         price,
-        image,
         brand,
         category,
         countInStock,

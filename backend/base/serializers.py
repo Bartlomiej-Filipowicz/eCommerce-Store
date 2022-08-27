@@ -57,6 +57,14 @@ class ReviewSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField(read_only=True)
 
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(allow_blank=True, allow_null=True, max_length=200)
+    price = serializers.DecimalField(max_digits=7, decimal_places=2, allow_null=True)
+    brand = serializers.CharField(allow_blank=True, allow_null=True, max_length=200)
+    countInStock = serializers.IntegerField(allow_null=True, default=0)
+    category = serializers.CharField(allow_blank=True, allow_null=True, max_length=200)
+    description = serializers.CharField(allow_null=True, allow_blank=True)
+
     class Meta:
         model = Product
         fields = "__all__"
@@ -65,6 +73,19 @@ class ProductSerializer(serializers.ModelSerializer):
         reviews = obj.review_set.all()
         serializer = ReviewSerializer(reviews, many=True)
         return serializer.data
+
+    def update(self, instance, validated_data):
+
+        instance.name = validated_data.get("name", instance.name)
+        instance.price = validated_data.get("price", instance.price)
+        instance.brand = validated_data.get("brand", instance.brand)
+        instance.countInStock = validated_data.get(
+            "countInStock", instance.countInStock
+        )
+        instance.category = validated_data.get("category", instance.category)
+        instance.description = validated_data.get("description", instance.description)
+        instance.save()
+        return instance
 
 
 class ShippingAddressSerializer(serializers.ModelSerializer):

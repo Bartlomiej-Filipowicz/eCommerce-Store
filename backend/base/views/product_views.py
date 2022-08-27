@@ -101,16 +101,10 @@ class AdminProducts(APIView):
         data = request.data
         product = Product.objects.get(id=pk)
 
-        product.name = data["name"]
-        product.price = data["price"]
-        product.brand = data["brand"]
-        product.countInStock = data["countInStock"]
-        product.category = data["category"]
-        product.description = data["description"]
+        serializer = ProductSerializer(instance=product, data=data, many=False)
+        serializer.is_valid()
 
-        product.save()
-
-        serializer = ProductSerializer(product, many=False)
+        serializer.save()
         return Response(serializer.data)
 
     def delete(self, request, pk, format=None):
