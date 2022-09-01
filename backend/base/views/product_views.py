@@ -1,6 +1,7 @@
 from base.models import Product, Review
 from base.serializers import ProductSerializer
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -67,7 +68,7 @@ class GetProduct(APIView):
 
     def get(self, request, pk, format=None):
         # get product
-        product = Product.objects.get(id=pk)
+        product = get_object_or_404(Product, id=pk)
         serializer = ProductSerializer(product, many=False)
         return Response(serializer.data)
 
@@ -99,17 +100,17 @@ class AdminProducts(APIView):
     def put(self, request, pk, format=None):
         # update product
         data = request.data
-        product = Product.objects.get(id=pk)
+        product = get_object_or_404(Product, id=pk)
 
         serializer = ProductSerializer(instance=product, data=data, many=False)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
 
         serializer.save()
         return Response(serializer.data)
 
     def delete(self, request, pk, format=None):
         # delete product
-        product = Product.objects.get(id=pk)
+        product = get_object_or_404(Product, id=pk)
         product.delete()
         return Response("Producted Deleted")
 
@@ -124,7 +125,7 @@ class UploadImage(APIView):
         data = request.data
 
         product_id = data["product_id"]
-        product = Product.objects.get(id=product_id)
+        product = get_object_or_404(Product, id=product_id)
 
         product.image = request.FILES.get("image")
         product.save()
@@ -142,7 +143,7 @@ class ProductReview(APIView):
     def post(self, request, pk, format=None):
         # create product review
         user = request.user
-        product = Product.objects.get(id=pk)
+        product = get_object_or_404(Product, id=pk)
         data = request.data
 
         # 1 - Review already exists

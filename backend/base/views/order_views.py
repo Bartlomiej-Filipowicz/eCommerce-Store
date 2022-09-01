@@ -2,6 +2,7 @@ from datetime import datetime
 
 from base.models import Order, OrderItem, Product, ShippingAddress
 from base.serializers import OrderSerializer
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -51,7 +52,8 @@ class UserOrders(APIView):
             # 3. Create OrderItem models and set Order to OrderItem relationship
 
             for i in orderItems:
-                product = Product.objects.get(id=i["product"])  # product is an id
+                product = get_object_or_404(Product, id=i["product"])
+                # product is an id
 
                 item = OrderItem.objects.create(
                     product=product,
@@ -77,7 +79,7 @@ class UserOrders(APIView):
         user = request.user
 
         try:
-            order = Order.objects.get(id=pk)
+            order = get_object_or_404(Order, id=pk)
             if user.is_staff or order.user == user:
                 serializer = OrderSerializer(order, many=False)
                 return Response(serializer.data)
@@ -93,7 +95,7 @@ class UserOrders(APIView):
 
     def put(self, request, pk, format=None):
         # update order to paid
-        order = Order.objects.get(id=pk)
+        order = get_object_or_404(Order, id=pk)
 
         order.isPaid = True
         order.paidAt = datetime.now()
@@ -134,7 +136,7 @@ class AdminOrders(APIView):
 
     def put(self, request, pk, format=None):
         # update order to delivered
-        order = Order.objects.get(id=pk)
+        order = get_object_or_404(Order, id=pk)
 
         order.isDelivered = True
         order.deliveredAt = datetime.now()

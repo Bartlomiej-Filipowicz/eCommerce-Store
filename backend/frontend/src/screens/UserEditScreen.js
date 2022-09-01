@@ -47,7 +47,9 @@ function UserEditScreen() {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(updateUser({ id: user.id, name, email, isAdmin }));
+    dispatch(
+      updateUser({ id: user.id, name, username: email, email, isAdmin })
+    );
   };
 
   return (

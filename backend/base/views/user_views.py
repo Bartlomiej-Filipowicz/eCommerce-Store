@@ -1,6 +1,7 @@
 from base.serializers import UserSerializer, UserSerializerWithToken
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User  # User is a model/database table
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -67,9 +68,7 @@ class UserProfile(APIView):
     def put(self, request, format=None):
         # update user profile
         user = request.user
-        serializer = UserSerializerWithToken(
-            user, many=False
-        )  # 'many=False' means that I want to obtain one user
+        serializer = UserSerializerWithToken(user, many=False)
 
         data = request.data
 
@@ -96,34 +95,6 @@ class UserProfile(APIView):
         return Response(serializer.data)
 
 
-class UpdateUser(APIView):
-    """
-    Updating user info
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request, pk, format=None):
-        # update user
-        user = User.objects.get(id=pk)
-
-        data = request.data
-
-        user.first_name = data["name"]
-        user.username = data["email"]
-        user.email = data["email"]
-        user.is_staff = data["isAdmin"]
-
-        if user.email != "":
-            user.username = user.email
-
-        user.save()
-
-        serializer = UserSerializer(user, many=False)
-
-        return Response(serializer.data)
-
-
 class AdminProfile(APIView):
     """
     User management for admins
@@ -139,9 +110,27 @@ class AdminProfile(APIView):
         # the User object is NOT serialized
         return Response(serializer.data)
 
+    def put(self, request, pk, format=None):
+        # update user
+        user = get_object_or_404(User, id=pk)
+
+        data = request.data
+        print(data)
+        serializer = UserSerializer(
+            user,
+            data=data,
+            many=False,
+        )
+        serializer.is_valid()
+        print(serializer.errors)
+        print(serializer.validated_data)
+
+        serializer.save()
+        return Response(serializer.data)
+
     def delete(self, request, pk, format=None):
         # delete user
-        userForDeletion = User.objects.get(id=pk)
+        userForDeletion = get_object_or_404(User, id=pk)
         userForDeletion.delete()
         return Response("User was deleted")
 
@@ -156,6 +145,6 @@ class AdminProfileId(APIView):
 
     def get(self, request, pk, format=None):
         # get user by id
-        user = User.objects.get(id=pk)
+        user = get_object_or_404(User, id=pk)
         serializer = UserSerializer(user, many=False)
         return Response(serializer.data)
