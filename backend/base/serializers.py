@@ -30,17 +30,13 @@ class UserSerializer(serializers.ModelSerializer):
         return name
 
 
-"""
-    def update(self, instance, validated_data):
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """first_name field serves as full name"""
 
-        instance.first_name = validated_data.get("name", instance.first_name)
-        instance.username = validated_data.get("username", instance.username)
-        instance.email = validated_data.get("email", instance.email)
-        instance.is_staff = validated_data.get("isAdmin", instance.is_staff)
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "first_name", "is_staff"]
 
-        instance.save()
-        return instance
-"""
 
 """UserSerializerWithToken generates a refresh token, it's needed
 for situations when a user first registers or changes account details"""

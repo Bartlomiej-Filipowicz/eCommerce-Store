@@ -1,4 +1,8 @@
-from base.serializers import UserSerializer, UserSerializerWithToken
+from base.serializers import (
+    UserSerializer,
+    UserSerializerWithToken,
+    UserUpdateSerializer,
+)
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User  # User is a model/database table
 from django.shortcuts import get_object_or_404
@@ -113,19 +117,17 @@ class AdminProfile(APIView):
     def put(self, request, pk, format=None):
         # update user
         user = get_object_or_404(User, id=pk)
-
         data = request.data
-        print(data)
-        serializer = UserSerializer(
+
+        serializer = UserUpdateSerializer(
             user,
             data=data,
             many=False,
         )
         serializer.is_valid()
-        print(serializer.errors)
-        print(serializer.validated_data)
+        # print(serializer.errors)
 
-        serializer.save()
+        serializer.save(first_name=data["name"], is_staff=data["isAdmin"])
         return Response(serializer.data)
 
     def delete(self, request, pk, format=None):
