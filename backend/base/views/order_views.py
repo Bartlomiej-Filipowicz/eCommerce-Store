@@ -79,18 +79,20 @@ class UserOrders(APIView):
         user = request.user
 
         try:
-            order = get_object_or_404(Order, id=pk)
-            if user.is_staff or order.user == user:
-                serializer = OrderSerializer(order, many=False)
-                return Response(serializer.data)
-            else:
-                Response(
-                    {"detail": "Not authorized to view this order"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            order = Order.objects.get(id=pk)
+
         except Order.DoesNotExist:
             return Response(
                 {"detail": "Order does not exist"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user.is_staff or order.user == user:
+            serializer = OrderSerializer(order, many=False)
+            return Response(serializer.data)
+        else:
+            Response(
+                {"detail": "Not authorized to view this order"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
     def put(self, request, pk, format=None):

@@ -118,16 +118,18 @@ class AdminProfile(APIView):
         # update user
         user = get_object_or_404(User, id=pk)
         data = request.data
+        data["first_name"] = data.pop("name")
+        data["is_staff"] = data.pop("isAdmin")
 
         serializer = UserUpdateSerializer(
             user,
             data=data,
             many=False,
         )
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         # print(serializer.errors)
 
-        serializer.save(first_name=data["name"], is_staff=data["isAdmin"])
+        serializer.save()
         return Response(serializer.data)
 
     def delete(self, request, pk, format=None):
