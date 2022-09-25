@@ -60,6 +60,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ReviewExistSerializer(serializers.Serializer):
+    def validate(self, data):
+        """
+        Check if review already exists.
+        """
+        alreadyExists = self.instance.review_set.filter(user=data).exists()
+        if alreadyExists:
+            raise serializers.ValidationError("Product already reviewed")
+        return data
+
+
+class ReviewValidateSerializer(serializers.Serializer):
+    def validate(self, data):
+        """
+        Check if there is a rating.
+        """
+        if int(data["rating"]) == 0:
+            raise serializers.ValidationError("There is no rating")
+        return data
+
+
 class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField(read_only=True)
 

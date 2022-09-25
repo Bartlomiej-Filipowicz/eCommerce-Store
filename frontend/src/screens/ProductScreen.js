@@ -226,7 +226,7 @@ function ProductScreen() {
                           value={rating}
                           onChange={(e) => setRating(e.target.value)}
                         >
-                          <option value="">Select...</option>
+                          <option value="0">Select...</option>
                           <option value="1">1 - Poor</option>
                           <option value="2">2 - Fair</option>
                           <option value="3">3 - Good</option>

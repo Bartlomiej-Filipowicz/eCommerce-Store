@@ -1,10 +1,15 @@
 from base.models import Product, Review
-from base.serializers import ProductSerializer
+from base.serializers import (
+    ProductSerializer,
+    ReviewExistSerializer,
+    ReviewValidateSerializer,
+)
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 
 # A view takes a web request and returns a web response.
@@ -147,34 +152,42 @@ class ProductReview(APIView):
         data = request.data
 
         # 1 - Review already exists
-        alreadyExists = product.review_set.filter(user=user).exists()
-        if alreadyExists:
-            content = {"detail": "Product already reviewed"}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-        # 2 - No Rating or 0
-        elif data["rating"] == 0:
-            content = {"detail": "Please select a rating"}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-        # 3 - Create review
-        else:
-            review = Review.objects.create(
-                user=user,
-                product=product,
-                name=user.first_name,
-                rating=data["rating"],
-                comment=data["comment"],
+        try:
+            serializer = ReviewExistSerializer(instance=product)
+            serializer.validate(data=user)
+        except ValidationError:
+            return Response(
+                {"detail": "Product already reviewed"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-            reviews = product.review_set.all()
-            product.numReviews = len(reviews)
+        # 2 - No Rating or 0
+        try:
+            serializer = ReviewValidateSerializer()
+            serializer.validate(data=data)
+        except ValidationError:
+            return Response(
+                {"detail": "Please select a rating"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-            total = 0
-            for i in reviews:
-                total += i.rating
+        # 3 - Create review
 
-            product.rating = total / len(reviews)
-            product.save()
+        review = Review.objects.create(
+            user=user,
+            product=product,
+            name=user.first_name,
+            rating=data["rating"],
+            comment=data["comment"],
+        )
 
-            return Response("Review Added")
+        reviews = product.review_set.all()
+        product.numReviews = len(reviews)
+
+        total = 0
+        for i in reviews:
+            total += i.rating
+
+        product.rating = total / len(reviews)
+        product.save()
+
+        return Response("Review Added")
