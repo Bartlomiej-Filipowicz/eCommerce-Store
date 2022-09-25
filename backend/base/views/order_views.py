@@ -10,14 +10,12 @@ from rest_framework.views import APIView
 
 
 class UserOrders(APIView):
-    """
-    Handling orders for users
-    """
+    """Handling orders for users"""
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        # add order items
+        """Add order items"""
 
         user = request.user
         data = request.data
@@ -74,7 +72,7 @@ class UserOrders(APIView):
             return Response(serializer.data)
 
     def get(self, request, pk, format=None):
-        # get order by Id
+        """Get order by Id"""
 
         user = request.user
 
@@ -96,7 +94,8 @@ class UserOrders(APIView):
             )
 
     def put(self, request, pk, format=None):
-        # update order to paid
+        """Update order to paid"""
+
         order = get_object_or_404(Order, id=pk)
 
         order.isPaid = True
@@ -107,14 +106,12 @@ class UserOrders(APIView):
 
 
 class MyOrders(APIView):
-    """
-    Getting all user's orders
-    """
+    """Getting all user's orders"""
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        # get my orders
+        """Get my orders"""
 
         user = request.user
         orders = user.order_set.all()
@@ -124,20 +121,20 @@ class MyOrders(APIView):
 
 
 class AdminOrders(APIView):
-    """
-    Handling orders for admins
-    """
+    """Handling orders for admins"""
 
     permission_classes = [IsAdminUser]
 
     def get(self, request, format=None):
-        # get orders
+        """Get orders"""
+
         orders = Order.objects.all()
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        # update order to delivered
+        """Update order to delivered"""
+
         order = get_object_or_404(Order, id=pk)
 
         order.isDelivered = True

@@ -7,28 +7,20 @@ from django.db import models
 # attributes in thoses classes are database columns
 
 
-class Product(
-    models.Model
-):  # <- thanks to this inheritance Djnago knows that Product is a model
+class Product(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True
     )  # a user can have multiple products (one-to-many relationship)
-    # ^^^ I set 'on_delete' to SET_NULL, because I do not want to delete
-    # a product when a user is deleted(it sets the reference to NULL)
     name = models.CharField(max_length=200, null=True, blank=True)
     image = models.ImageField(null=True, blank=True, default="/placeholder.png")
-    brand = models.CharField(
-        max_length=200, null=True, blank=True
-    )  # null=True -> Django will store empty values as NULL in the database
+    brand = models.CharField(max_length=200, null=True, blank=True)
     category = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     rating = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     numReviews = models.IntegerField(null=True, blank=True, default=0)
     price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     countInStock = models.IntegerField(null=True, blank=True, default=0)
-    createdAt = models.DateTimeField(
-        auto_now_add=True
-    )  # takes the date and time the moment an object is created
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return self.name
@@ -84,7 +76,7 @@ class ShippingAddress(models.Model):
     order = models.OneToOneField(
         Order, on_delete=models.CASCADE, null=True, blank=True
     )  # an order can have only one shipping address
-    # ^^^ CASCADE: when Order is deleted, delete ShippingAddress as well
+    # CASCADE: when Order is deleted, delete ShippingAddress as well
     address = models.CharField(max_length=200, null=True, blank=True)
     city = models.CharField(max_length=200, null=True, blank=True)
     postalCode = models.CharField(max_length=200, null=True, blank=True)

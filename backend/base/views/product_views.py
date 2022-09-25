@@ -16,20 +16,17 @@ from rest_framework.views import APIView
 
 
 class GetProducts(APIView):
-    """
-    Return a set of products
-    """
+    """Return a set of products"""
 
     def get(self, request, format=None):
-        # get products
+        """Get products"""
+
         query = request.query_params.get("keyword")  # for search box functionality
 
         if query is None:
             query = ""
 
         products = Product.objects.filter(name__icontains=query)
-        # ^^ it's looking for a word(from query) in a name of products
-        # and is case-insensitive
 
         page = request.query_params.get("page")
         paginator = Paginator(products, 4)  # 4 items for each page
@@ -47,46 +44,42 @@ class GetProducts(APIView):
         page = int(page)
 
         serializer = ProductSerializer(products, many=True)
-        # return Response(products) <- it's incorrect because
-        # the Product object is NOT serialized
+
         return Response(
             {"products": serializer.data, "page": page, "pages": paginator.num_pages}
         )
 
 
 class TopProducts(APIView):
-    """
-    Getting top products for the carousel
-    """
+    """Getting top products for the carousel"""
 
     def get(self, request, format=None):
-        # get top products
+        """Get top products"""
+
         products = Product.objects.filter(rating__gte=4).order_by("-rating")[0:5]
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
 
 class GetProduct(APIView):
-    """
-    Getting a single product
-    """
+    """Getting a single product"""
 
     def get(self, request, pk, format=None):
-        # get product
+        """Get product"""
+
         product = get_object_or_404(Product, id=pk)
         serializer = ProductSerializer(product, many=False)
         return Response(serializer.data)
 
 
 class AdminProducts(APIView):
-    """
-    Handling products for admins
-    """
+    """Handling products for admins"""
 
     permission_classes = [IsAdminUser]
 
     def post(self, request, format=None):
-        # create product
+        """Create product"""
+
         user = request.user
 
         product = Product.objects.create(
@@ -103,7 +96,8 @@ class AdminProducts(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        # update product
+        """Update product"""
+
         data = request.data
         product = get_object_or_404(Product, id=pk)
 
@@ -114,19 +108,19 @@ class AdminProducts(APIView):
         return Response(serializer.data)
 
     def delete(self, request, pk, format=None):
-        # delete product
+        """Delete product"""
+
         product = get_object_or_404(Product, id=pk)
         product.delete()
         return Response("Producted Deleted")
 
 
 class UploadImage(APIView):
-    """
-    Uploading an image for a product
-    """
+    """Uploading an image for a product"""
 
     def post(self, request, format=None):
-        # upload image
+        """Upload image"""
+
         data = request.data
 
         product_id = data["product_id"]
@@ -139,14 +133,13 @@ class UploadImage(APIView):
 
 
 class ProductReview(APIView):
-    """
-    Creating a product review
-    """
+    """Creating a product review"""
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk, format=None):
-        # create product review
+        """Create product review"""
+
         user = request.user
         product = get_object_or_404(Product, id=pk)
         data = request.data

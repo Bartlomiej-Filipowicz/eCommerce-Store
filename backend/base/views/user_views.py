@@ -15,13 +15,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 # A view takes a web request and returns a web response.
 
-# I create a serializer for every single model that I want to return,
-# a serializer is going to wrap my model and turn that model into a JSON format
-
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        # a username and a password authentication
+        """username and password authentication"""
+
         data = super().validate(attrs)
 
         serializer = UserSerializerWithToken(self.user).data
@@ -39,12 +37,11 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 class RegisterUser(APIView):
-    """
-    Creating a new account
-    """
+    """Creating a new account"""
 
     def post(self, request, format=None):
-        # register user
+        """Register user"""
+
         data = request.data
 
         try:
@@ -63,14 +60,13 @@ class RegisterUser(APIView):
 
 
 class UserProfile(APIView):
-    """
-    Handling user profile
-    """
+    """Handling user profile"""
 
     permission_classes = [IsAuthenticated]
 
     def put(self, request, format=None):
-        # update user profile
+        """Update user profile"""
+
         user = request.user
         serializer = UserSerializerWithToken(user, many=False)
 
@@ -88,34 +84,31 @@ class UserProfile(APIView):
 
         user.save()
 
-        # return Response(user) <- it's incorrect because it's NOT serialized
         return Response(serializer.data)
 
     def get(self, request, format=None):
-        # get user profile
+        """Get user profile"""
+
         user = request.user
         serializer = UserSerializer(user, many=False)
-        # return Response(user) <- it's incorrect because it's NOT serialized
         return Response(serializer.data)
 
 
 class AdminProfile(APIView):
-    """
-    User management for admins
-    """
+    """User management for admins"""
 
     permission_classes = [IsAdminUser]
 
     def get(self, request, format=None):
-        # get users
+        """Get users"""
+
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
-        # return Response(users) <- it's incorrect because
-        # the User object is NOT serialized
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        # update user
+        """Update user"""
+
         user = get_object_or_404(User, id=pk)
         data = request.data
         data["first_name"] = data.pop("name")
@@ -133,22 +126,22 @@ class AdminProfile(APIView):
         return Response(serializer.data)
 
     def delete(self, request, pk, format=None):
-        # delete user
+        """Delete user"""
+
         userForDeletion = get_object_or_404(User, id=pk)
         userForDeletion.delete()
         return Response("User was deleted")
 
 
 class AdminProfileId(APIView):
-    """
-    User management for admins
-    Extracting a single user
-    """
+    """User management for admins
+    Extracting a single user"""
 
     permission_classes = [IsAdminUser]
 
     def get(self, request, pk, format=None):
-        # get user by id
+        """Get user by id"""
+
         user = get_object_or_404(User, id=pk)
         serializer = UserSerializer(user, many=False)
         return Response(serializer.data)
