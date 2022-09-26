@@ -7,14 +7,15 @@ from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 
 
-class UserOrders(APIView):
+class UserOrders(ViewSet):
     """Handling orders for users"""
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, format=None):
+    def create(self, request, format=None):
         """Add order items"""
 
         user = request.user
@@ -71,7 +72,7 @@ class UserOrders(APIView):
 
             return Response(serializer.data)
 
-    def get(self, request, pk, format=None):
+    def retrieve(self, request, pk, format=None):
         """Get order by Id"""
 
         user = request.user
@@ -93,7 +94,7 @@ class UserOrders(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def put(self, request, pk, format=None):
+    def partial_update(self, request, pk, format=None):
         """Update order to paid"""
 
         order = get_object_or_404(Order, id=pk)

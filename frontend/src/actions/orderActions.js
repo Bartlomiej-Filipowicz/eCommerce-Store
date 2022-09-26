@@ -121,7 +121,7 @@ export const payOrder = (id, paymentResult) => async (dispatch, getState) => {
 
     // it sends a username and a password and gets in return the JWT token
     const { data } = await axios.put(
-      `/api/orders/${id}/pay/`,
+      `/api/orders/pay/${id}/`,
       paymentResult,
       config
     );
