@@ -4,18 +4,26 @@ from base.models import Order, OrderItem, Product, ShippingAddress
 from base.serializers import OrderSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 
 
-class UserOrders(ViewSet):
-    """Handling orders for users"""
+class OrderViewSet(ModelViewSet):
+    """Handling orders for users and admins"""
 
-    permission_classes = [IsAuthenticated]
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
 
-    def create(self, request, format=None):
+    @action(
+        methods=["post"],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path="create_order",
+    )
+    def create_order(self, request, format=None):
         """Add order items"""
 
         user = request.user
@@ -72,13 +80,14 @@ class UserOrders(ViewSet):
 
             return Response(serializer.data)
 
-    def retrieve(self, request, pk, format=None):
+    @action(methods=["get"], detail=True, permission_classes=[IsAuthenticated])
+    def get_one_order(self, request, pk, format=None):
         """Get order by Id"""
 
         user = request.user
 
         try:
-            order = Order.objects.get(id=pk)
+            order = self.queryset.get(id=pk)
 
         except Order.DoesNotExist:
             return Response(
@@ -94,10 +103,11 @@ class UserOrders(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def partial_update(self, request, pk, format=None):
+    @action(methods=["put"], detail=True, permission_classes=[IsAuthenticated])
+    def pay(self, request, pk, format=None):
         """Update order to paid"""
 
-        order = get_object_or_404(Order, id=pk)
+        order = get_object_or_404(self.queryset, id=pk)
 
         order.isPaid = True
         order.paidAt = datetime.now()
@@ -105,13 +115,8 @@ class UserOrders(ViewSet):
 
         return Response("Order was paid")
 
-
-class MyOrders(APIView):
-    """Getting all user's orders"""
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, format=None):
+    @action(methods=["get"], detail=False, permission_classes=[IsAuthenticated])
+    def myorders(self, request, format=None):
         """Get my orders"""
 
         user = request.user
@@ -120,23 +125,19 @@ class MyOrders(APIView):
 
         return Response(serializer.data)
 
-
-class AdminOrders(APIView):
-    """Handling orders for admins"""
-
-    permission_classes = [IsAdminUser]
-
-    def get(self, request, format=None):
-        """Get orders"""
+    @action(methods=["get"], detail=False, permission_classes=[IsAdminUser])
+    def all_orders(self, request, format=None):
+        """Get all orders"""
 
         orders = Order.objects.all()
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
+    @action(methods=["put"], detail=True, permission_classes=[IsAdminUser])
+    def deliver(self, request, pk, format=None):
         """Update order to delivered"""
 
-        order = get_object_or_404(Order, id=pk)
+        order = get_object_or_404(self.queryset, id=pk)
 
         order.isDelivered = True
         order.deliveredAt = datetime.now()

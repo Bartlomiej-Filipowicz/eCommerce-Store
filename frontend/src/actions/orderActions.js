@@ -41,7 +41,11 @@ export const createOrder = (order) => async (dispatch, getState) => {
     };
 
     // it sends a username and a password and gets in return the JWT token
-    const { data } = await axios.post("/api/orders/add/", order, config);
+    const { data } = await axios.post(
+      "/api/orders/create_order/",
+      order,
+      config
+    );
 
     dispatch({
       type: ORDER_CREATE_SUCCESS,
@@ -121,7 +125,7 @@ export const payOrder = (id, paymentResult) => async (dispatch, getState) => {
 
     // it sends a username and a password and gets in return the JWT token
     const { data } = await axios.put(
-      `/api/orders/pay/${id}/`,
+      `/api/orders/${id}/pay/`,
       paymentResult,
       config
     );
@@ -230,7 +234,7 @@ export const listOrders = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get(`/api/orders/`, config);
+    const { data } = await axios.get(`/api/orders/all_orders/`, config);
 
     dispatch({
       type: ORDER_LIST_SUCCESS,
