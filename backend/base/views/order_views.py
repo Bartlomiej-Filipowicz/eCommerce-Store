@@ -7,8 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.viewsets import ModelViewSet
 
 
 class OrderViewSet(ModelViewSet):
@@ -33,7 +32,8 @@ class OrderViewSet(ModelViewSet):
 
         if orderItems and len(orderItems) == 0:
             return Response(
-                {"detail": "No Order Items"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "No Order Items"},
+                status=status.HTTP_400_BAD_REQUEST,  # noqa: E501
             )
         else:
             # 1. Create Order model
@@ -48,7 +48,7 @@ class OrderViewSet(ModelViewSet):
 
             # 2. Create ShippingAddress model
 
-            shipping = ShippingAddress.objects.create(
+            shipping = ShippingAddress.objects.create(  # noqa: F841
                 order=order,
                 address=data["shippingAddress"]["address"],
                 city=data["shippingAddress"]["city"],
@@ -56,7 +56,8 @@ class OrderViewSet(ModelViewSet):
                 country=data["shippingAddress"]["country"],
             )
 
-            # 3. Create OrderItem models and set Order to OrderItem relationship
+            # 3. Create OrderItem models
+            # and set Order to OrderItem relationship
 
             for i in orderItems:
                 product = get_object_or_404(Product, id=i["product"])
@@ -91,7 +92,8 @@ class OrderViewSet(ModelViewSet):
 
         except Order.DoesNotExist:
             return Response(
-                {"detail": "Order does not exist"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Order does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,  # noqa: E501
             )
 
         if user.is_staff or order.user == user:
@@ -115,7 +117,9 @@ class OrderViewSet(ModelViewSet):
 
         return Response("Order was paid")
 
-    @action(methods=["get"], detail=False, permission_classes=[IsAuthenticated])
+    @action(
+        methods=["get"], detail=False, permission_classes=[IsAuthenticated]
+    )  # noqa: E501
     def myorders(self, request, format=None):
         """Get my orders"""
 
