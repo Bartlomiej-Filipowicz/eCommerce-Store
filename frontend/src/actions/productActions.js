@@ -27,7 +27,7 @@ export const listProducts = (keyword = "") => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
 
-    const { data } = await axios.get(`/api/products${keyword}`); // API call (GET method)
+    const { data } = await axios.get(`/api/products/all_products/${keyword}`); // API call (GET method)
 
     dispatch({
       type: PRODUCT_LIST_SUCCESS,
@@ -103,7 +103,11 @@ export const createProduct = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.post(`/api/products/create/`, {}, config);
+    const { data } = await axios.post(
+      `/api/products/create_product/`,
+      {},
+      config
+    );
     dispatch({
       type: PRODUCT_CREATE_SUCCESS,
       payload: data,
@@ -137,7 +141,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
     };
 
     const { data } = await axios.put(
-      `/api/products/update/${product.id}/`,
+      `/api/products/${product.id}/update_product/`,
       product,
       config
     );
@@ -178,7 +182,7 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
       },
     };
     // eslint-disable-next-line
-    const { data } = await axios.delete(`/api/products/delete/${id}/`, config);
+    const { data } = await axios.delete(`/api/products/${id}/delete/`, config);
 
     dispatch({
       type: PRODUCT_DELETE_SUCCESS,
@@ -215,7 +219,7 @@ export const createProductReview = (productId, review) => async (
     };
 
     const { data } = await axios.post(
-      `/api/products/${productId}/reviews/`,
+      `/api/products/${productId}/review/`,
       review,
       config
     );

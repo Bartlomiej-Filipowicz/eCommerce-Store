@@ -7,26 +7,33 @@ from base.serializers import (
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
-from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
 # A view takes a web request and returns a web response.
 
 
-class GetProducts(APIView):
-    """Return a set of products"""
+class ProductViewSet(ModelViewSet):
+    """Getting products
+    Handling products for admins"""
 
-    def get(self, request, format=None):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    @action(methods=["get"], detail=False)
+    def all_products(self, request, format=None):
         """Get products"""
 
-        query = request.query_params.get("keyword")  # for search box functionality
+        query = request.query_params.get("keyword")
+        # for search box functionality
 
         if query is None:
             query = ""
 
-        products = Product.objects.filter(name__icontains=query)
+        products = self.queryset.filter(name__icontains=query)
 
         page = request.query_params.get("page")
         paginator = Paginator(products, 4)  # 4 items for each page
@@ -46,39 +53,32 @@ class GetProducts(APIView):
         serializer = ProductSerializer(products, many=True)
 
         return Response(
-            {"products": serializer.data, "page": page, "pages": paginator.num_pages}
+            {
+                "products": serializer.data,
+                "page": page,
+                "pages": paginator.num_pages,
+            }  # noqa: E501
         )
 
-
-class TopProducts(APIView):
-    """Getting top products for the carousel"""
-
-    def get(self, request, format=None):
+    @action(methods=["get"], detail=False)
+    def top(self, request, format=None):
         """Get top products"""
 
-        products = Product.objects.filter(rating__gte=4).order_by("-rating")[0:5]
+        products = self.queryset.filter(rating__gte=4).order_by("-rating")[0:5]
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
+    @action(methods=["get"], detail=True)
+    def product(self, request, pk, format=None):
+        """Get a single product"""
 
-class GetProduct(APIView):
-    """Getting a single product"""
-
-    def get(self, request, pk, format=None):
-        """Get product"""
-
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(self.queryset, id=pk)
         serializer = ProductSerializer(product, many=False)
         return Response(serializer.data)
 
-
-class AdminProducts(APIView):
-    """Handling products for admins"""
-
-    permission_classes = [IsAdminUser]
-
-    def post(self, request, format=None):
-        """Create product"""
+    @action(methods=["post"], detail=False, permission_classes=[IsAdminUser])
+    def create_product(self, request, format=None):
+        """Create a product"""
 
         user = request.user
 
@@ -95,11 +95,12 @@ class AdminProducts(APIView):
         serializer = ProductSerializer(product, many=False)
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
+    @action(methods=["put"], detail=True, permission_classes=[IsAdminUser])
+    def update_product(self, request, pk, format=None):
         """Update product"""
 
         data = request.data
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(self.queryset, id=pk)
 
         serializer = ProductSerializer(instance=product, data=data, many=False)
         serializer.is_valid(raise_exception=True)
@@ -107,41 +108,36 @@ class AdminProducts(APIView):
         serializer.save()
         return Response(serializer.data)
 
+    @action(methods=["delete"], detail=True, permission_classes=[IsAdminUser])
     def delete(self, request, pk, format=None):
-        """Delete product"""
+        """Delete a product"""
 
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(self.queryset, id=pk)
         product.delete()
         return Response("Producted Deleted")
 
-
-class UploadImage(APIView):
-    """Uploading an image for a product"""
-
-    def post(self, request, format=None):
-        """Upload image"""
+    @action(methods=["post"], detail=False)
+    def upload_image(self, request, format=None):
+        """Upload image for a product"""
 
         data = request.data
 
         product_id = data["product_id"]
-        product = get_object_or_404(Product, id=product_id)
+        product = get_object_or_404(self.queryset, id=product_id)
 
         product.image = request.FILES.get("image")
         product.save()
 
         return Response("Image was uploaded")
 
-
-class ProductReview(APIView):
-    """Creating a product review"""
-
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, pk, format=None):
-        """Create product review"""
+    @action(
+        methods=["post"], detail=True, permission_classes=[IsAuthenticated]
+    )  # noqa: E501
+    def review(self, request, pk, format=None):
+        """Create a product review"""
 
         user = request.user
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(self.queryset, id=pk)
         data = request.data
 
         # 1 - Review already exists
@@ -160,12 +156,13 @@ class ProductReview(APIView):
             serializer.validate(data=data)
         except ValidationError:
             return Response(
-                {"detail": "Please select a rating"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Please select a rating"},
+                status=status.HTTP_400_BAD_REQUEST,  # noqa: E501
             )
 
         # 3 - Create review
 
-        review = Review.objects.create(
+        review = Review.objects.create(  # noqa: F841
             user=user,
             product=product,
             name=user.first_name,

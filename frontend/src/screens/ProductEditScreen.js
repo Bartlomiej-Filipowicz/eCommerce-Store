@@ -87,7 +87,7 @@ function ProductEditScreen() {
       };
 
       const { data } = await axios.post(
-        "/api/products/upload/",
+        "/api/products/upload_image/",
         formData,
         config
       );
