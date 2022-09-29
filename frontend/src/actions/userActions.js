@@ -162,7 +162,7 @@ export const updateUserProfile = (user) => async (dispatch, getState) => {
 
     // it sends a username and a password and gets in return the JWT token
     const { data } = await axios.put(
-      "/api/users/profile/update/",
+      "/api/users/update_profile/",
       user,
       config
     );
@@ -241,7 +241,7 @@ export const deleteUser = (id) => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.delete(`/api/users/delete/${id}/`, config);
+    const { data } = await axios.delete(`/api/users/${id}/delete/`, config);
 
     dispatch({
       type: USER_DELETE_SUCCESS,
@@ -276,7 +276,7 @@ export const updateUser = (user) => async (dispatch, getState) => {
     };
 
     const { data } = await axios.put(
-      `/api/users/update/${user.id}/`,
+      `/api/users/${user.id}/update_user/`,
       user,
       config
     );

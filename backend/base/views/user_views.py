@@ -7,9 +7,10 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User  # User is a model/database table
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -36,10 +37,15 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class RegisterUser(APIView):
-    """Creating a new account"""
+class UserViewSet(ModelViewSet):
+    """Handling user accounts
+    User management for admins"""
 
-    def post(self, request, format=None):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    @action(methods=["post"], detail=False)
+    def register(self, request, format=None):
         """Register user"""
 
         data = request.data
@@ -54,17 +60,14 @@ class RegisterUser(APIView):
             serializer = UserSerializerWithToken(user, many=False)
             return Response(serializer.data)
 
-        except:
+        except:  # noqa: E722
             message = {"detail": "User with this email already exists :("}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-
-class UserProfile(APIView):
-    """Handling user profile"""
-
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request, format=None):
+    @action(
+        methods=["put"], detail=False, permission_classes=[IsAuthenticated]
+    )  # noqa: E501
+    def update_profile(self, request, format=None):
         """Update user profile"""
 
         user = request.user
@@ -86,30 +89,30 @@ class UserProfile(APIView):
 
         return Response(serializer.data)
 
-    def get(self, request, format=None):
+    @action(
+        methods=["get"], detail=False, permission_classes=[IsAuthenticated]
+    )  # noqa: E501
+    def profile(self, request, format=None):
         """Get user profile"""
 
         user = request.user
         serializer = UserSerializer(user, many=False)
         return Response(serializer.data)
 
-
-class AdminProfile(APIView):
-    """User management for admins"""
-
-    permission_classes = [IsAdminUser]
-
-    def get(self, request, format=None):
+    @action(
+        methods=["get"], detail=False, permission_classes=[IsAdminUser], url_path=""
+    )
+    def all_users(self, request, format=None):
         """Get users"""
 
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
+        serializer = UserSerializer(self.queryset, many=True)
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
-        """Update user"""
+    @action(methods=["put"], detail=True, permission_classes=[IsAdminUser])
+    def update_user(self, request, pk, format=None):
+        """Update user details (by admin)"""
 
-        user = get_object_or_404(User, id=pk)
+        user = get_object_or_404(self.queryset, id=pk)
         data = request.data
         data["first_name"] = data.pop("name")
         data["is_staff"] = data.pop("isAdmin")
@@ -125,23 +128,18 @@ class AdminProfile(APIView):
         serializer.save()
         return Response(serializer.data)
 
+    @action(methods=["delete"], detail=True, permission_classes=[IsAdminUser])
     def delete(self, request, pk, format=None):
-        """Delete user"""
+        """Delete a user"""
 
-        userForDeletion = get_object_or_404(User, id=pk)
+        userForDeletion = get_object_or_404(self.queryset, id=pk)
         userForDeletion.delete()
         return Response("User was deleted")
 
-
-class AdminProfileId(APIView):
-    """User management for admins
-    Extracting a single user"""
-
-    permission_classes = [IsAdminUser]
-
-    def get(self, request, pk, format=None):
+    @action(methods=["get"], detail=True, permission_classes=[IsAdminUser], url_path="")
+    def get_user(self, request, pk, format=None):
         """Get user by id"""
 
-        user = get_object_or_404(User, id=pk)
+        user = get_object_or_404(self.queryset, id=pk)
         serializer = UserSerializer(user, many=False)
         return Response(serializer.data)
