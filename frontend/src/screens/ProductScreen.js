@@ -96,7 +96,7 @@ function ProductScreen() {
                 <ListGroup.Item>
                   <Rating
                     value={product.rating}
-                    text={`${product.numReviews} reviews`}
+                    text={`${product.num_reviews} reviews`}
                     color={"#f8e825"}
                   />
                 </ListGroup.Item>
@@ -129,12 +129,14 @@ function ProductScreen() {
                         <strong className="text-light">Status </strong>
                       </Col>
                       <Col>
-                        {product.countInStock > 0 ? "In Stock" : "Out of Stock"}
+                        {product.count_in_stock > 0
+                          ? "In Stock"
+                          : "Out of Stock"}
                       </Col>
                     </Row>
                   </ListGroup.Item>
 
-                  {product.countInStock > 0 && (
+                  {product.count_in_stock > 0 && (
                     <ListGroup.Item>
                       <Row>
                         <Col>
@@ -150,14 +152,14 @@ function ProductScreen() {
                               // e stands for event
                             }
 
-                            {[...Array(product.countInStock).keys()].map(
+                            {[...Array(product.count_in_stock).keys()].map(
                               (x) => (
                                 <option key={x + 1} value={x + 1}>
                                   {x + 1}
                                 </option>
                               )
                             )
-                            // ^^^ I created an array out of countInStock,
+                            // ^^^ I created an array out of count_in_stock,
                             // and then I map through that array creating options
                             }
                           </Form.Control>
@@ -171,7 +173,7 @@ function ProductScreen() {
                       <Button
                         onClick={addToCartHandler}
                         className="btn-block"
-                        disabled={product.countInStock === 0}
+                        disabled={product.count_in_stock === 0}
                         size="lg"
                         type="button"
                       >
@@ -199,7 +201,7 @@ function ProductScreen() {
                     <Rating value={review.rating} color="#f8e825" />
                     <p>
                       <strong className="text-secondary">
-                        {review.createdAt.substring(0, 10)}
+                        {review.created_at.substring(0, 10)}
                       </strong>
                     </p>
                     <p>{review.comment}</p>

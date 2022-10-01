@@ -4,6 +4,8 @@ from django.urls import path
 from rest_framework import routers
 from rest_framework.urlpatterns import format_suffix_patterns
 
+# flake8: noqa E501
+
 router = routers.SimpleRouter()
 router.register(r"", views.UserViewSet)
 

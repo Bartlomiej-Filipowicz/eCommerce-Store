@@ -15,6 +15,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # A view takes a web request and returns a web response.
+# flake8: noqa E501
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):

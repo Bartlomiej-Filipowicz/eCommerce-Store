@@ -49,7 +49,7 @@ function ProductEditScreen() {
         setImage(product.image);
         setBrand(product.brand);
         setCategory(product.category);
-        setCountInStock(product.countInStock);
+        setCountInStock(product.count_in_stock);
         setDescription(product.description);
       }
     }
@@ -64,7 +64,7 @@ function ProductEditScreen() {
         price,
         brand,
         category,
-        countInStock,
+        count_in_stock: countInStock,
         description,
       })
     );

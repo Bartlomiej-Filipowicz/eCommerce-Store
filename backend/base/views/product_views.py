@@ -87,7 +87,7 @@ class ProductViewSet(ModelViewSet):
             name="Sample Name",
             price=0,
             brand="Sample Brand",
-            countInStock=0,
+            count_in_stock=0,
             category="Sample Category",
             description="",
         )
@@ -171,7 +171,7 @@ class ProductViewSet(ModelViewSet):
         )
 
         reviews = product.review_set.all()
-        product.numReviews = len(reviews)
+        product.num_reviews = len(reviews)
 
         total = 0
         for i in reviews:

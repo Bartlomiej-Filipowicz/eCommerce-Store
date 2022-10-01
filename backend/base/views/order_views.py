@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from base.models import Order, OrderItem, Product, ShippingAddress
 from base.serializers import OrderSerializer
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -28,9 +27,9 @@ class OrderViewSet(ModelViewSet):
         user = request.user
         data = request.data
 
-        orderItems = data["orderItems"]
+        order_items = data["order_items"]
 
-        if orderItems and len(orderItems) == 0:
+        if order_items and len(order_items) == 0:
             return Response(
                 {"detail": "No Order Items"},
                 status=status.HTTP_400_BAD_REQUEST,  # noqa: E501
@@ -40,10 +39,10 @@ class OrderViewSet(ModelViewSet):
 
             order = Order.objects.create(
                 user=user,
-                paymentMethod=data["paymentMethod"],
-                taxPrice=data["taxPrice"],
-                shippingPrice=data["shippingPrice"],
-                totalPrice=data["totalPrice"],
+                payment_method=data["payment_method"],
+                tax_price=data["tax_price"],
+                shipping_price=data["shipping_price"],
+                total_price=data["total_price"],
             )
 
             # 2. Create ShippingAddress model
@@ -52,14 +51,14 @@ class OrderViewSet(ModelViewSet):
                 order=order,
                 address=data["shippingAddress"]["address"],
                 city=data["shippingAddress"]["city"],
-                postalCode=data["shippingAddress"]["postalCode"],
+                postal_code=data["shippingAddress"]["postal_code"],
                 country=data["shippingAddress"]["country"],
             )
 
             # 3. Create OrderItem models
             # and set Order to OrderItem relationship
 
-            for i in orderItems:
+            for i in order_items:
                 product = get_object_or_404(Product, id=i["product"])
                 # product is an id
 
@@ -74,7 +73,7 @@ class OrderViewSet(ModelViewSet):
 
                 # 4. Update stock
 
-                product.countInStock -= item.qty
+                product.count_in_stock -= item.qty
                 product.save()
 
             serializer = OrderSerializer(order, many=False)
@@ -111,8 +110,8 @@ class OrderViewSet(ModelViewSet):
 
         order = get_object_or_404(self.queryset, id=pk)
 
-        order.isPaid = True
-        order.paidAt = datetime.now()
+        order.is_paid = True
+        order.paid_at = timezone.now()
         order.save()
 
         return Response("Order was paid")
@@ -143,8 +142,8 @@ class OrderViewSet(ModelViewSet):
 
         order = get_object_or_404(self.queryset, id=pk)
 
-        order.isDelivered = True
-        order.deliveredAt = datetime.now()
+        order.is_delivered = True
+        order.delivered_at = timezone.now()
         order.save()
 
         return Response("Order was delivered")

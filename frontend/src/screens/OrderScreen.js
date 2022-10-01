@@ -40,7 +40,7 @@ function OrderScreen() {
   // INITIALLLY 'itemsPrice' was an attribute of the 'cart' state, but it was causing Error: Invariant failed: A state mutation
   // was detected between dispatches, in the path 'cart.itemsPrice'
   if (!loading && !error) {
-    order.itemsPrice = order.orderItems
+    order.itemsPrice = order.order_items
       .reduce((acc, item) => acc + item.price * item.qty, 0)
       .toFixed(2);
   }
@@ -75,7 +75,7 @@ function OrderScreen() {
       dispatch({ type: ORDER_DELIVER_RESET });
 
       dispatch(getOrderDetails(orderId));
-    } else if (!order.isPaid) {
+    } else if (!order.is_paid) {
       if (!window.paypal) {
         addPayPalScript();
       } else {
@@ -123,13 +123,13 @@ function OrderScreen() {
                 </strong>
                 {order.shippingAddress.address}, {order.shippingAddress.city}
                 {"  "}
-                {order.shippingAddress.postalCode},{"  "}
+                {order.shippingAddress.postal_code},{"  "}
                 {order.shippingAddress.country}
               </p>
 
-              {order.isDelivered ? (
+              {order.is_delivered ? (
                 <Message variant="success">
-                  Delivered on {order.deliveredAt.substring(0, 10)}
+                  Delivered on {order.delivered_at.substring(0, 10)}
                 </Message>
               ) : (
                 <Message variant="primary">Not Delivered</Message>
@@ -143,12 +143,12 @@ function OrderScreen() {
                 <strong className="text-secondary">
                   Method: &nbsp; &nbsp;{" "}
                 </strong>
-                {order.paymentMethod}
+                {order.payment_method}
               </p>
 
-              {order.isPaid ? (
+              {order.is_paid ? (
                 <Message variant="success">
-                  Paid on {order.paidAt.substring(0, 19).replace("T", "  ")}
+                  Paid on {order.paid_at.substring(0, 19).replace("T", "  ")}
                 </Message>
               ) : (
                 <Message variant="primary">Not Paid</Message>
@@ -158,11 +158,11 @@ function OrderScreen() {
             <ListGroup.Item>
               <h2 className="text-light">Order Items</h2>
 
-              {order.orderItems.length === 0 ? (
+              {order.order_items.length === 0 ? (
                 <Message variant="info">Order is empty</Message>
               ) : (
                 <ListGroup variant="flush">
-                  {order.orderItems.map((item, index) => (
+                  {order.order_items.map((item, index) => (
                     <ListGroup.Item key={index}>
                       <Row>
                         <Col md={1}>
@@ -215,7 +215,7 @@ function OrderScreen() {
                   <Col>
                     <strong className="text-light">Shipping </strong>
                   </Col>
-                  <Col>${order.shippingPrice}</Col>
+                  <Col>${order.shipping_price}</Col>
                 </Row>
               </ListGroup.Item>
 
@@ -224,7 +224,7 @@ function OrderScreen() {
                   <Col>
                     <strong className="text-light">Tax </strong>
                   </Col>
-                  <Col>${order.taxPrice}</Col>
+                  <Col>${order.tax_price}</Col>
                 </Row>
               </ListGroup.Item>
 
@@ -233,11 +233,11 @@ function OrderScreen() {
                   <Col>
                     <strong className="text-secondary">Total </strong>
                   </Col>
-                  <Col>${order.totalPrice}</Col>
+                  <Col>${order.total_price}</Col>
                 </Row>
               </ListGroup.Item>
 
-              {!order.isPaid && (
+              {!order.is_paid && (
                 <ListGroup.Item>
                   {loadingPay && <Loader />}
 
@@ -245,7 +245,7 @@ function OrderScreen() {
                     <Loader />
                   ) : (
                     <PayPalButton
-                      amount={order.totalPrice}
+                      amount={order.total_price}
                       onSuccess={successPaymentHandler}
                     />
                   )}
@@ -255,8 +255,8 @@ function OrderScreen() {
               {loadingDeliver && <Loader />}
               {userInfo &&
                 userInfo.isAdmin &&
-                order.isPaid &&
-                !order.isDelivered && (
+                order.is_paid &&
+                !order.is_delivered && (
                   <ListGroup.Item className="mt-3">
                     <div className="d-grid gap-2">
                       <Button type="button" size="lg" onClick={deliverHandler}>

@@ -90,12 +90,12 @@ function CartScreen() {
                         // e stands for event
                       }
 
-                      {[...Array(item.countInStock).keys()].map((x) => (
+                      {[...Array(item.count_in_stock).keys()].map((x) => (
                         <option key={x + 1} value={x + 1}>
                           {x + 1}
                         </option>
                       ))
-                      // ^^^ I created an array out of countInStock,
+                      // ^^^ I created an array out of count_in_stock,
                       // and then I map through that array creating options
                       }
                     </Form.Control>

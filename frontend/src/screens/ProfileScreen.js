@@ -165,11 +165,11 @@ function ProfileScreen() {
               {orders.map((order) => (
                 <tr key={order.id}>
                   <td>{order.id}</td>
-                  <td>{order.createdAt.substring(0, 10)}</td>
-                  <td>${order.totalPrice}</td>
+                  <td>{order.created_at.substring(0, 10)}</td>
+                  <td>${order.total_price}</td>
                   <td>
-                    {order.isPaid ? (
-                      order.paidAt.substring(0, 10)
+                    {order.is_paid ? (
+                      order.paid_at.substring(0, 10)
                     ) : (
                       <i className="fas fa-times" style={{ color: "red" }}></i>
                     )}

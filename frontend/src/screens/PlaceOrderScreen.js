@@ -47,13 +47,13 @@ function PlaceOrderScreen() {
   const placeOrder = () => {
     dispatch(
       createOrder({
-        orderItems: cart.cartItems,
+        order_items: cart.cartItems,
         shippingAddress: cart.shippingAddress,
-        paymentMethod: cart.paymentMethod,
+        payment_method: cart.paymentMethod,
         itemsPrice: itemsPrice,
-        shippingPrice: shippingPrice,
-        taxPrice: taxPrice,
-        totalPrice: totalPrice,
+        shipping_price: shippingPrice,
+        tax_price: taxPrice,
+        total_price: totalPrice,
       })
     );
   };
@@ -72,7 +72,7 @@ function PlaceOrderScreen() {
                 <strong class="text-secondary">Shipping: </strong>
                 {cart.shippingAddress.address}, {cart.shippingAddress.city}
                 {"  "}
-                {cart.shippingAddress.postalCode},{"  "}
+                {cart.shippingAddress.postal_code},{"  "}
                 {cart.shippingAddress.country}
               </p>
             </ListGroup.Item>

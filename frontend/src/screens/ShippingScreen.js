@@ -14,7 +14,7 @@ function ShippingScreen() {
 
   const [address, setAddress] = useState(shippingAddress.address);
   const [city, setCity] = useState(shippingAddress.city);
-  const [postalCode, setPostalCode] = useState(shippingAddress.postalCode);
+  const [postalCode, setPostalCode] = useState(shippingAddress.postal_code);
   const [country, setCountry] = useState(
     shippingAddress.country ? shippingAddress.country : "Poland"
   );
@@ -23,7 +23,9 @@ function ShippingScreen() {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(saveShippingAddress({ address, city, postalCode, country }));
+    dispatch(
+      saveShippingAddress({ address, city, postal_code: postalCode, country })
+    );
     navigate("/payment"); // replaces history.push()
     //^^^^^^^^^^be careful here, coz it can be '/login/payment'
   };
