@@ -119,8 +119,7 @@ export const getUserDetails = (id) => async (dispatch, getState) => {
     const config = {
       headers: {
         "Content-type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`, // the route to a user profile page is protected that's why
-        //  authorization is needed
+        Authorization: `Bearer ${userInfo.token}`,
       },
     };
 

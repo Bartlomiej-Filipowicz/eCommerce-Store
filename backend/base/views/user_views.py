@@ -59,7 +59,7 @@ class UserViewSet(ModelViewSet):
                 password=make_password(data["password"]),
             )
             serializer = UserSerializerWithToken(user, many=False)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except:  # noqa: E722
             message = {"detail": "User with this email already exists :("}
