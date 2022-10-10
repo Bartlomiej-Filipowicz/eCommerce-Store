@@ -4,27 +4,23 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Order, OrderItem, Product, Review, ShippingAddress
 
-# I create a serializer for every single model that I want to return,
-# a serializer is going to wrap my model
-# and turn that model into a JSON format
-
 
 class UserSerializer(serializers.ModelSerializer):
+
     name = serializers.SerializerMethodField(read_only=True)  # custom field
-    _id = serializers.SerializerMethodField(read_only=True)  # custom field
     isAdmin = serializers.SerializerMethodField(read_only=True)  # custom field
+    # first_name field serves as full name
 
     class Meta:
         model = User
-        fields = ["id", "_id", "username", "email", "name", "isAdmin"]
-
-    def get__id(self, obj):
-        return obj.id
+        fields = ["id", "username", "email", "name", "isAdmin"]
 
     def get_isAdmin(self, obj):
+        # isAdmin is read_only
         return obj.is_staff
 
     def get_name(self, obj):
+        # name is read_only
         name = obj.first_name
         if name == "":
             name = obj.email
@@ -32,16 +28,23 @@ class UserSerializer(serializers.ModelSerializer):
         return name
 
 
-"""UserSerializerWithToken generates a refresh token, it's needed
-for situations when a user first registers or changes account details"""
+class UserUpdateSerializer(serializers.ModelSerializer):
+    # first_name field serves as full name
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "first_name", "is_staff"]
 
 
 class UserSerializerWithToken(UserSerializer):
+    """UserSerializerWithToken generates a refresh token, it's needed
+    for situations when a user first registers or changes account details"""
+
     token = serializers.SerializerMethodField(read_only=True)  # custom field
 
     class Meta:
         model = User
-        fields = ["id", "_id", "username", "email", "name", "isAdmin", "token"]
+        fields = ["id", "username", "email", "name", "isAdmin", "token"]
 
     def get_token(self, obj):
         token = RefreshToken.for_user(obj)
@@ -54,7 +57,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ReviewExistSerializer(serializers.Serializer):
+    def validate(self, data):
+        """Check if review already exists"""
+
+        alreadyExists = self.instance.review_set.filter(user=data).exists()
+        if alreadyExists:
+            raise serializers.ValidationError("Product already reviewed")
+        return data
+
+
+class ReviewValidateSerializer(serializers.Serializer):
+    def validate(self, data):
+        """Check if there is a rating"""
+
+        if int(data["rating"]) == 0:
+            raise serializers.ValidationError("There is no rating")
+        return data
+
+
 class ProductSerializer(serializers.ModelSerializer):
+
     reviews = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -80,7 +103,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    orderItems = serializers.SerializerMethodField(read_only=True)
+    order_items = serializers.SerializerMethodField(read_only=True)
     shippingAddress = serializers.SerializerMethodField(read_only=True)
     user = serializers.SerializerMethodField(read_only=True)
 
@@ -88,7 +111,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = "__all__"
 
-    def get_orderItems(self, obj):
+    def get_order_items(self, obj):
         items = obj.orderitem_set.all()
         serializer = OrderItemSerializer(items, many=True)
 

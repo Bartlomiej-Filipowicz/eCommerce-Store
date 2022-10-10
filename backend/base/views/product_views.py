@@ -1,147 +1,168 @@
 from base.models import Product, Review
-from base.serializers import ProductSerializer
+from base.serializers import (
+    ProductSerializer,
+    ReviewExistSerializer,
+    ReviewValidateSerializer,
+)
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
+from rest_framework.viewsets import ModelViewSet
 
-# A view function takes a web request and returns a web response.
-
-# Create your views here.
-
-
-@api_view(["GET"])
-def getProducts(request):
-    query = request.query_params.get("keyword")  # for search box functionality
-
-    if query is None:
-        query = ""
-
-    products = Product.objects.filter(
-        name__icontains=query
-    )  # it takes data from the database, because Product is a model
-    # ^^ it's looking for a word(from query) in a name of products
-    # and is case-insensitive
-
-    page = request.query_params.get("page")
-    paginator = Paginator(products, 4)  # 2 items for each page
-
-    try:
-        products = paginator.page(page)
-    except PageNotAnInteger:
-        products = paginator.page(1)
-    except EmptyPage:
-        products = paginator.page(paginator.num_pages)
-
-    if page is None:
-        page = 1
-
-    page = int(page)
-
-    serializer = ProductSerializer(products, many=True)
-    # 'many=True' means that I'm passing multiple objects
-    # return Response(products) <- it's incorrect because
-    # the Product object is NOT serialized
-    return Response(
-        {"products": serializer.data, "page": page, "pages": paginator.num_pages}
-    )  # now the data comes from the database
+# A view takes a web request and returns a web response.
 
 
-@api_view(["GET"])
-def getTopProducts(request):
-    products = Product.objects.filter(rating__gte=4).order_by("-rating")[0:5]
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
+class ProductViewSet(ModelViewSet):
+    """Getting products
+    Handling products for admins"""
 
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
-@api_view(["GET"])
-def getProduct(request, pk):  # pk stands for primary key
-    product = Product.objects.get(_id=pk)
-    serializer = ProductSerializer(product, many=False)
-    return Response(serializer.data)  # now the data comes from the database
+    @action(methods=["get"], detail=False)
+    def all_products(self, request, format=None):
+        """Get products"""
 
+        query = request.query_params.get("keyword")
+        # for search box functionality
 
-@api_view(["POST"])
-@permission_classes([IsAdminUser])
-def createProduct(request):
-    user = request.user
+        if query is None:
+            query = ""
 
-    product = Product.objects.create(
-        user=user,
-        name="Sample Name",
-        price=0,
-        brand="Sample Brand",
-        countInStock=0,
-        category="Sample Category",
-        description="",
-    )
+        products = self.queryset.filter(name__icontains=query)
 
-    serializer = ProductSerializer(product, many=False)
-    return Response(serializer.data)
+        page = request.query_params.get("page")
+        paginator = Paginator(products, 4)  # 4 items for each page
 
+        try:
+            products = paginator.page(page)
+        except PageNotAnInteger:
+            products = paginator.page(1)
+        except EmptyPage:
+            products = paginator.page(paginator.num_pages)
 
-@api_view(["PUT"])
-@permission_classes([IsAdminUser])
-def updateProduct(request, pk):
-    data = request.data
-    product = Product.objects.get(_id=pk)
+        if page is None:
+            page = 1
 
-    product.name = data["name"]
-    product.price = data["price"]
-    product.brand = data["brand"]
-    product.countInStock = data["countInStock"]
-    product.category = data["category"]
-    product.description = data["description"]
+        page = int(page)
 
-    product.save()
+        serializer = ProductSerializer(products, many=True)
 
-    serializer = ProductSerializer(product, many=False)
-    return Response(serializer.data)
+        return Response(
+            {
+                "products": serializer.data,
+                "page": page,
+                "pages": paginator.num_pages,
+            }  # noqa: E501
+        )
 
+    @action(methods=["get"], detail=False)
+    def top(self, request, format=None):
+        """Get top products"""
 
-@api_view(["DELETE"])
-@permission_classes([IsAdminUser])
-def deleteProduct(request, pk):
-    product = Product.objects.get(_id=pk)
-    product.delete()
-    return Response("Producted Deleted")
+        products = self.queryset.filter(rating__gte=4).order_by("-rating")[0:5]
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
 
+    @action(methods=["get"], detail=True)
+    def product(self, request, pk, format=None):
+        """Get a single product"""
 
-@api_view(["POST"])
-def uploadImage(request):
-    data = request.data
+        product = get_object_or_404(self.queryset, id=pk)
+        serializer = ProductSerializer(product, many=False)
+        return Response(serializer.data)
 
-    product_id = data["product_id"]
-    product = Product.objects.get(_id=product_id)
+    @action(methods=["post"], detail=False, permission_classes=[IsAdminUser])
+    def create_product(self, request, format=None):
+        """Create a product"""
 
-    product.image = request.FILES.get("image")
-    product.save()
+        user = request.user
 
-    return Response("Image was uploaded")
+        product = Product.objects.create(
+            user=user,
+            name="Sample Name",
+            price=0,
+            brand="Sample Brand",
+            count_in_stock=0,
+            category="Sample Category",
+            description="",
+        )
 
+        serializer = ProductSerializer(product, many=False)
+        return Response(serializer.data)
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def createProductReview(request, pk):
-    user = request.user
-    product = Product.objects.get(_id=pk)
-    data = request.data
+    @action(methods=["put"], detail=True, permission_classes=[IsAdminUser])
+    def update_product(self, request, pk, format=None):
+        """Update product"""
 
-    # 1 - Review already exists
-    alreadyExists = product.review_set.filter(user=user).exists()
-    if alreadyExists:
-        content = {"detail": "Product already reviewed"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        product = get_object_or_404(self.queryset, id=pk)
 
-    # 2 - No Rating or 0
-    elif data["rating"] == 0:
-        content = {"detail": "Please select a rating"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ProductSerializer(instance=product, data=data, many=False)
+        serializer.is_valid(raise_exception=True)
 
-    # 3 - Create review
-    else:
-        review = Review.objects.create(
+        serializer.save()
+        return Response(serializer.data)
+
+    @action(methods=["delete"], detail=True, permission_classes=[IsAdminUser])
+    def delete(self, request, pk, format=None):
+        """Delete a product"""
+
+        product = get_object_or_404(self.queryset, id=pk)
+        product.delete()
+        return Response("Producted Deleted")
+
+    @action(methods=["post"], detail=False)
+    def upload_image(self, request, format=None):
+        """Upload image for a product"""
+
+        data = request.data
+
+        product_id = data["product_id"]
+        product = get_object_or_404(self.queryset, id=product_id)
+
+        product.image = request.FILES.get("image")
+        product.save()
+
+        return Response("Image was uploaded")
+
+    @action(
+        methods=["post"], detail=True, permission_classes=[IsAuthenticated]
+    )  # noqa: E501
+    def review(self, request, pk, format=None):
+        """Create a product review"""
+
+        user = request.user
+        product = get_object_or_404(self.queryset, id=pk)
+        data = request.data
+
+        # 1 - Review already exists
+        try:
+            serializer = ReviewExistSerializer(instance=product)
+            serializer.validate(data=user)
+        except ValidationError:
+            return Response(
+                {"detail": "Product already reviewed"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 2 - No Rating or 0
+        try:
+            serializer = ReviewValidateSerializer()
+            serializer.validate(data=data)
+        except ValidationError:
+            return Response(
+                {"detail": "Please select a rating"},
+                status=status.HTTP_400_BAD_REQUEST,  # noqa: E501
+            )
+
+        # 3 - Create review
+
+        review = Review.objects.create(  # noqa: F841
             user=user,
             product=product,
             name=user.first_name,
@@ -150,7 +171,7 @@ def createProductReview(request, pk):
         )
 
         reviews = product.review_set.all()
-        product.numReviews = len(reviews)
+        product.num_reviews = len(reviews)
 
         total = 0
         for i in reviews:
