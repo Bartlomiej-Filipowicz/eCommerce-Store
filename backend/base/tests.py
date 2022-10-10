@@ -54,13 +54,13 @@ class UserProfileTestCase(APITestCase):
             data={
                 "id": self.user.id,
                 "name": "testcase2",
-                "email": "test2@localhost.app",
+                "email": "test@localhost.app",
                 "password": "strong-pswd",
             },
-            content_type="application/json",
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(response.data["user"], "test@localhost.app")
+        self.assertEqual(response.data["email"], "test@localhost.app")
 
 
 class UserProfileAdminTestCase(APITestCase):
@@ -93,6 +93,6 @@ class UserProfileAdminTestCase(APITestCase):
                 "email": "test2@localhost.app",
                 "isAdmin": "True",
             },
-            content_type="application/json",
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
